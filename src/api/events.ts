@@ -1,6 +1,7 @@
 // src/api/EventsAPI.ts
 
 import { CohostEndpoint } from '../endpoint';
+import { EventProfile, Ticket } from '../../types/index';
 
 /**
  * Provides methods to interact with the Cohost Events API.
@@ -21,7 +22,7 @@ export class EventsAPI extends CohostEndpoint {
    * @throws Will throw an error if the request fails or the event is not found
    */
   async fetch(id: string) {
-    return this.request(`/events/${id}`);
+    return this.request<EventProfile>(`/events/${id}`);
   }
 
   /**
@@ -32,6 +33,6 @@ export class EventsAPI extends CohostEndpoint {
    * @throws Will throw an error if the request fails or the event does not exist
    */
   async tickets(id: string) {
-    return this.request(`/events/${id}/tickets`);
+    return this.request<Ticket[]>(`/events/${id}/tickets`);
   }
 }

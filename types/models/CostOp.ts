@@ -2,20 +2,16 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+/**
+ * Represents a cost operation to be applied in a pricing formula.
+ */
 export type CostOp = {
-    op: CostOp.op;
     /**
-     * Absolute values should match the denominator, and denomination of the cost.
-     * so if the amount in USD is in cents, the value should be in cents.
+     * The operand value used in the cost operation.
+     *
+     * The unit should match the denomination of the cost.
+     * For example, if cost is expressed in cents, this value should also be in cents.
      */
     value: number;
 };
-export namespace CostOp {
-    export enum op {
-        _ = '*',
-        _ = '+',
-        _ = '-',
-        _ = '/',
-    }
-}
 

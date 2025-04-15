@@ -16,7 +16,7 @@ export { CostComponent } from './models/CostComponent';
 export { CostComponentCap } from './models/CostComponentCap';
 export type { CostComponentRule } from './models/CostComponentRule';
 export type { CostComponentRuleCondition } from './models/CostComponentRuleCondition';
-export { CostOp } from './models/CostOp';
+export type { CostOp } from './models/CostOp';
 export type { CurrencyAmount } from './models/CurrencyAmount';
 export type { DataRecord } from './models/DataRecord';
 export { EqualOperator } from './models/EqualOperator';

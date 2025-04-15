@@ -1,97 +1,120 @@
 import { apiBaseUrl } from "../apiVersion";
+import { defaultSettings, runtimeOverrides } from "../settings";
 
 /**
  * Options for configuring the request handler.
  */
 interface RequestProps {
-    /** API token for authentication (Bearer token). */
-    token: string | null;
+  /** API token for authentication (Bearer token). */
+  token: string | null;
 
-    /** Base URL of the API (defaults to versioned `apiBaseUrl`). */
-    baseUrl?: string;
+  /** Base URL of the API (defaults to versioned `apiBaseUrl`). */
+  baseUrl?: string;
 
-    /** Enable debug logging of requests/responses. */
-    debug?: boolean;
+  /** Enable debug logging of requests/responses. */
+  debug?: boolean;
 }
 
 /**
  * Supported HTTP methods.
  */
-type RequestMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+type RequestMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
 
 /**
  * A function that performs a request to the Cohost API.
+ * The generic <T> allows you to specify the expected response type.
  */
-type RequestFn = (
-    /** Path of the request relative to baseUrl */
-    path: string,
-    options?: {
-        /** HTTP method (defaults to 'GET') */
-        method?: RequestMethod;
-
-        /** Request body data (auto-serialized as JSON) */
-        data?: any;
-
-        /** Query parameters to be appended to the URL */
-        query?: Record<string, string | number | boolean | undefined>;
-
-        /** Additional headers to merge into the request */
-        headers?: Record<string, string>;
-    }
-) => Promise<any>;
+type RequestFn = <T = any>(
+  path: string,
+  options?: {
+    method?: RequestMethod;
+    data?: any;
+    query?: Record<string, string | number | boolean | undefined>;
+    headers?: Record<string, string>;
+  }
+) => Promise<T>;
 
 /**
- * Creates a request function configured with authentication and defaults.
+ * Creates a request function configured with authentication and client defaults.
+ * The returned function supports generic return typing via <T>.
  */
 const request = ({ token, baseUrl = apiBaseUrl, debug = false }: RequestProps): RequestFn => {
-    return async (path, { method = 'GET', data, query, headers = {} } = {}) => {
-        const queryString = query
-            ? '?' + new URLSearchParams(
-                Object.entries(query).reduce((acc, [key, value]) => {
-                    if (value !== undefined) acc[key] = String(value);
-                    return acc;
-                }, {} as Record<string, string>)
-            ).toString()
-            : '';
+  return async function <T = any>(
+    path: string,
+    options: {
+      method?: RequestMethod;
+      data?: any;
+      query?: Record<string, string | number | boolean | undefined>;
+      headers?: Record<string, string>;
+    } = {}
+  ): Promise<T> {
+    const { method = "GET", data, query, headers = {} } = options;
 
-        const url = `${baseUrl}${path}${queryString}`;
+    // Construct query string from `query` object
+    const queryString = query
+      ? "?" +
+        new URLSearchParams(
+          Object.entries(query).reduce((acc, [key, value]) => {
+            if (value !== undefined) acc[key] = String(value);
+            return acc;
+          }, {} as Record<string, string>)
+        ).toString()
+      : "";
 
-        const reqHeaders: Record<string, string> = {
-            'Content-Type': 'application/json',
-            ...headers,
-        };
+    const finalBaseUrl = runtimeOverrides.baseUrl ?? baseUrl;
+    const url = `${finalBaseUrl}${path}${queryString}`;
 
-        if (token) {
-            reqHeaders['Authorization'] = `Bearer ${token}`;
-        }
-
-        const body = data && method !== 'GET' ? JSON.stringify(data) : undefined;
-
-        if (debug) {
-            console.log(`[Cohost SDK] Request: ${method} ${url}`);
-            if (body) console.log(`[Cohost SDK] Body:`, body);
-        }
-
-        const res = await fetch(url, {
-            method,
-            headers: reqHeaders,
-            body,
-        });
-
-        const isJson = res.headers.get('content-type')?.includes('application/json');
-        const responseBody = isJson ? await res.json() : await res.text();
-
-        if (!res.ok) {
-            const message = typeof responseBody === 'string' ? responseBody : JSON.stringify(responseBody);
-            throw new Error(`[Cohost SDK] ${res.status} ${res.statusText}: ${message}`);
-        }
-
-        if (typeof responseBody === 'object' && responseBody !== null && responseBody.status === 'ok' && 'data' in responseBody) {
-            return responseBody.data;
-        }
-
-        return responseBody;
+    // Merge default, runtime, and per-request headers
+    const reqHeaders: Record<string, string> = {
+      ...defaultSettings.headers,
+      ...runtimeOverrides.headers,
+      ...headers,
     };
+
+    // Add Authorization header if token is present
+    if (token) {
+      reqHeaders["Authorization"] = `Bearer ${token}`;
+    }
+
+    // Only send body if method allows it
+    const body = data && method !== "GET" ? JSON.stringify(data) : undefined;
+
+    // Optional debug logging
+    if (debug) {
+      console.log(`[Cohost SDK] Request: ${method} ${url}`);
+      if (body) console.log(`[Cohost SDK] Body:`, body);
+      console.log(`[Cohost SDK] Headers:`, reqHeaders);
+    }
+
+    const res = await fetch(url, {
+      method,
+      headers: reqHeaders,
+      body,
+    });
+
+    // Parse the response based on content type
+    const isJson = res.headers.get("content-type")?.includes("application/json");
+    const responseBody = isJson ? await res.json() : await res.text();
+
+    // Handle error responses
+    if (!res.ok) {
+      const message = typeof responseBody === "string" ? responseBody : JSON.stringify(responseBody);
+      throw new Error(`[Cohost SDK] ${res.status} ${res.statusText}: ${message}`);
+    }
+
+    // If wrapped response structure with { status: 'ok', data }, return `data`
+    if (
+      typeof responseBody === "object" &&
+      responseBody !== null &&
+      (responseBody as any).status === "ok" &&
+      "data" in responseBody
+    ) {
+      return (responseBody as { data: T }).data;
+    }
+
+    // Fallback for raw/unwrapped responses
+    return responseBody as T;
+  };
 };
 
 export { request, RequestProps, RequestFn };

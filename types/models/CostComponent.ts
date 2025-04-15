@@ -5,7 +5,6 @@
 import type { CostBucket } from './CostBucket';
 import type { CostComponentCap } from './CostComponentCap';
 import type { CostComponentRule } from './CostComponentRule';
-import type { CostOp } from './CostOp';
 export type CostComponent = {
     base: string;
     bucket: CostBucket;
@@ -14,7 +13,6 @@ export type CostComponent = {
     details?: any;
     id?: string;
     name: string;
-    ops: Array<CostOp>;
     payer: CostComponent.payer;
     recipient: string;
     rules: Array<CostComponentRule>;

@@ -17,23 +17,19 @@ export interface CohostClientOptions {
 
 /**
  * CohostClient provides grouped access to various API modules such as Events and Orders.
- * 
- * Usage:
- * ```ts
- * const client = new CohostClient({ token: 'your-token' });
- * const event = await client.events.fetch('event-id');
- * const order = await client.orders.fetch('order-id', 'user-id');
- * ```
  */
 export class CohostClient {
-  /** Access to Event-related endpoints */
-  readonly events: EventsAPI;
+  public readonly events: EventsAPI;
+  public readonly orders: OrdersAPI;
 
-  /** Access to Order-related endpoints */
-  readonly orders: OrdersAPI;
+  private readonly baseOptions: CohostClientOptions;
 
-  constructor({ token, settings = {} }: CohostClientOptions) {
-    const sharedRequest: RequestFn = request({
+  constructor(options: CohostClientOptions, customRequestFn?: RequestFn) {
+    this.baseOptions = options;
+
+    const { token, settings = {} } = options;
+
+    const sharedRequest = customRequestFn ?? request({
       token,
       baseUrl: settings.apiUrl || apiBaseUrl,
       debug: settings.debug,
@@ -41,5 +37,40 @@ export class CohostClient {
 
     this.events = new EventsAPI(sharedRequest, settings);
     this.orders = new OrdersAPI(sharedRequest, settings);
+  }
+
+  /**
+   * Returns a new CohostClient instance with overridden request behavior
+   */
+  public requestWithOverrides(overrides: {
+    token?: string;
+    baseUrl?: string;
+    headers?: Record<string, string>;
+  }): CohostClient {
+    const { token, settings = {} } = this.baseOptions;
+
+    const overriddenRequest: RequestFn = (path, options = {}) =>
+      request({
+        token: overrides.token ?? token,
+        baseUrl: overrides.baseUrl ?? settings.apiUrl ?? apiBaseUrl,
+        debug: settings.debug,
+      })(path, {
+        ...options,
+        headers: {
+          ...(overrides.headers || {}),
+          ...(options.headers || {}),
+        },
+      });
+
+    return new CohostClient(
+      {
+        token: overrides.token ?? token,
+        settings: {
+          ...settings,
+          apiUrl: overrides.baseUrl ?? settings.apiUrl,
+        },
+      },
+      overriddenRequest
+    );
   }
 }

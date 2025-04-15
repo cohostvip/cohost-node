@@ -8,3 +8,22 @@ export interface CohostClientSettings {
     /** Override the default API base URL (defaults to apiBaseUrl). */
     apiUrl?: string;
 }
+
+// settings.ts
+export const defaultSettings = {
+    baseUrl: 'https://api.cohost.vip',
+    headers: {
+        'Content-Type': 'application/json',
+    },
+};
+
+// In dev or testing, you can override this in the browser or Node
+export let runtimeOverrides: {
+    baseUrl?: string;
+    headers?: Record<string, string>;
+} = {};
+
+export function setSdkOverrides(overrides: typeof runtimeOverrides) {
+    runtimeOverrides = overrides;
+}
+

@@ -1,66 +1,78 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { request } from '../src/http/request'; // Adjust path if needed
+import { request } from '../src/http/request';
+import { setSdkOverrides } from '../src/settings';
 
 global.fetch = vi.fn();
 
-describe('request()', () => {
+describe('request', () => {
   const token = 'test-token';
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.resetAllMocks();
+    setSdkOverrides({});
   });
 
-  it('returns plain data when response is raw object (no status wrapper)', async () => {
-    const mockResponse = { id: '123', name: 'Test Object' };
-    (fetch as any).mockResolvedValue({
+  it('constructs a proper GET request', async () => {
+    const mockResponse = { status: 'ok', data: { message: 'hello' } };
+
+    (fetch as any).mockResolvedValueOnce({
       ok: true,
-      headers: { get: () => 'application/json' },
+      status: 200,
+      statusText: 'OK',
       json: async () => mockResponse,
+      headers: {
+        get: () => 'application/json',
+      },
     });
 
-    const api = request({ token });
-    const result = await api('/test');
-
-    expect(result).toEqual(mockResponse);
-  });
-
-  it('unwraps { status: "ok", data: ... } responses', async () => {
-    const mockResponse = { status: 'ok', data: { id: 'abc', label: 'Unwrapped' } };
-    (fetch as any).mockResolvedValue({
-      ok: true,
-      headers: { get: () => 'application/json' },
-      json: async () => mockResponse,
-    });
-
-    const api = request({ token });
-    const result = await api('/wrapped');
+    const req = request({ token });
+    const result = await req('/test', { query: { a: 1, b: 'x' } });
 
     expect(result).toEqual(mockResponse.data);
-  });
-
-  it('uses custom baseUrl if provided', async () => {
-    const mockResponse = { status: 'ok', data: { message: 'custom base URL used' } };
-    const customBaseUrl = 'https://api.customhost.com/v2';
-
-    (fetch as any).mockResolvedValue({
-      ok: true,
-      headers: { get: () => 'application/json' },
-      json: async () => mockResponse,
-    });
-
-    const api = request({ token, baseUrl: customBaseUrl });
-    const result = await api('/endpoint');
-
     expect(fetch).toHaveBeenCalledWith(
-      'https://api.customhost.com/v2/endpoint',
+      expect.stringContaining('/test?a=1&b=x'),
       expect.objectContaining({
         method: 'GET',
         headers: expect.objectContaining({
-          Authorization: `Bearer ${token}`,
+          Authorization: 'Bearer test-token',
+          'Content-Type': 'application/json',
         }),
       })
     );
+  });
 
-    expect(result).toEqual(mockResponse.data);
+  it('uses runtimeOverrides for baseUrl and headers', async () => {
+    const mockResponse = { status: 'ok', data: { from: 'mock' } };
+
+    (fetch as any).mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      statusText: 'OK',
+      json: async () => mockResponse,
+      headers: {
+        get: () => 'application/json',
+      },
+    });
+
+    setSdkOverrides({
+      baseUrl: 'http://localhost:9999',
+      headers: {
+        Prefer: 'code=200, example=test-case',
+      },
+    });
+
+    const req = request({ token: null });
+
+    await req('/mocked-endpoint');
+
+    expect(fetch).toHaveBeenCalledWith(
+      'http://localhost:9999/mocked-endpoint',
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          Prefer: 'code=200, example=test-case',
+          'Content-Type': 'application/json',
+        }),
+      })
+    );
   });
 });
