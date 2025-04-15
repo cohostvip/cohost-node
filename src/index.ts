@@ -1,2 +1,16 @@
-export {
-    CohostClient } from './client';
+import { CohostClient, CohostClientOptions } from './client';
+
+/**
+ * Factory method for creating a CohostClient instance.
+ * 
+ * Example:
+ * ```ts
+ * const client = createCohostClient({ token: 'your-token' });
+ * ```
+ */
+export function createCohostClient(options: CohostClientOptions): CohostClient {
+    return new CohostClient(options);
+}
+
+
+export { CohostClient }
