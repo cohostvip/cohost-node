@@ -1,5 +1,11 @@
 # @cohostvip/cohost-node
 
+## 0.0.4
+
+### Patch Changes
+
+- Added cart sessions endpoints
+
 ## 0.0.3
 
 ### Patch Changes
