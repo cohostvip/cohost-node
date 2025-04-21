@@ -2,15 +2,12 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-/**
- * Base metadata for any record stored in the system.
- * Includes an ID and timestamps for creation and optional updates.
- */
-export type DataRecord = {
+export type VCDataRecord = {
     /**
      * ISO 8601 timestamp indicating when the record was last updated, if applicable.
      */
     changed?: string;
+    companyId: string;
     /**
      * ISO 8601 timestamp indicating when the record was created.
      */
@@ -19,5 +16,10 @@ export type DataRecord = {
      * Unique identifier for the record.
      */
     id: string;
+    /**
+     * Schema version identifier for this record.
+     * Helps manage compatibility across client-server contracts.
+     */
+    version: string;
 };
 

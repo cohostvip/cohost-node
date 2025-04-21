@@ -9,11 +9,26 @@ import { EventProfile, Ticket } from '../../types/index';
  * Usage:
  * ```ts
  * const client = new CohostClient({ token: 'your-token' });
+ * const list = await client.events.list();
  * const event = await client.events.fetch('event-id');
  * const tickets = await client.events.tickets('event-id');
  * ```
  */
 export class EventsAPI extends CohostEndpoint {
+
+  /**
+   * Fetch a list of all events.
+   * 
+   * @returns A Promise resolving to an array of event objects
+   * @throws Will throw an error if the request fails
+   * 
+   * @todo Implement pagination and filtering options
+   */
+  async list() {
+    return this.request<EventProfile[]>('/events');
+  }
+
+
   /**
    * Fetch a single event by ID.
    * 
@@ -24,6 +39,8 @@ export class EventsAPI extends CohostEndpoint {
   async fetch(id: string) {
     return this.request<EventProfile>(`/events/${id}`);
   }
+
+
 
   /**
    * List all tickets associated with a specific event.

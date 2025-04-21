@@ -3,10 +3,10 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * Base metadata for any record stored in the system.
- * Includes an ID and timestamps for creation and optional updates.
+ * Extension of `DataRecord` for resources returned from RESTful APIs.
+ * Includes a schema version to ensure compatibility with evolving formats.
  */
-export type DataRecord = {
+export type VersionedDataRecord = {
     /**
      * ISO 8601 timestamp indicating when the record was last updated, if applicable.
      */
@@ -19,5 +19,10 @@ export type DataRecord = {
      * Unique identifier for the record.
      */
     id: string;
+    /**
+     * Schema version identifier for this record.
+     * Helps manage compatibility across client-server contracts.
+     */
+    version: string;
 };
 

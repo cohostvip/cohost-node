@@ -9,6 +9,24 @@ import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
 export class EventsService {
     /**
+     * List all event profiles for the authenticated organizer
+     * @returns any A list of event profiles
+     * @throws ApiError
+     */
+    public static listEventProfiles(): CancelablePromise<{
+        status: 'ok';
+        data: Array<EventProfile>;
+    }> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/events',
+            errors: {
+                401: `Unauthorized - missing organizerId`,
+                500: `Internal server error`,
+            },
+        });
+    }
+    /**
      * Get event profile
      * @param id The ID of the event
      * @returns any OK

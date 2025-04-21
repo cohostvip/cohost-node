@@ -11,21 +11,32 @@ import type { PriceCategory } from './PriceCategory';
 import type { Schedule } from './Schedule';
 export type Offering = {
     capacity: number;
+    /**
+     * ISO 8601 timestamp indicating when the record was last updated, if applicable.
+     */
     changed?: string;
     /**
      * Any constraints that apply to this offering.
      * it can be time limit, quantity limit, etc...
      */
-    constraints: any;
+    constraints?: any;
     /**
      * Describe fees and other costs associated with purchasing tickets
      * to this offering
+     *
+     * --@schema array(z.any()).optional()
      */
     costComponents?: Array<CostComponent>;
     costs: OfferingCosts;
+    /**
+     * ISO 8601 timestamp indicating when the record was created.
+     */
     created: string;
     description?: string;
     hidden: boolean;
+    /**
+     * Unique identifier for the record.
+     */
     id: string;
     included?: Array<PackageInclude>;
     instructions?: string;
@@ -37,10 +48,6 @@ export type Offering = {
     name: string;
     order_confirmation_message?: string;
     package?: boolean;
-    /**
-     * Parent doc assicated with this offering in the DB.
-     */
-    parentPath: string;
     priceCategory: PriceCategory;
     quantitySold: number;
     schedule?: Schedule;

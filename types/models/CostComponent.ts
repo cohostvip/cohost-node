@@ -11,7 +11,7 @@ export type CostComponent = {
     cap?: CostComponentCap;
     currency: string;
     details?: any;
-    id?: string;
+    id: string;
     name: string;
     payer: CostComponent.payer;
     recipient: string;

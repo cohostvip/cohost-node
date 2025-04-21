@@ -11,16 +11,27 @@ import type { Schedule } from './Schedule';
 export type Ticket = {
     capacity: number;
     category: string;
+    /**
+     * ISO 8601 timestamp indicating when the record was last updated, if applicable.
+     */
     changed?: string;
     /**
      * Describe fees and other costs associated with purchasing tickets
      * to this offering
+     *
+     * --@schema array(z.any()).optional()
      */
     costComponents?: Array<CostComponent>;
     costs: OfferingCosts;
+    /**
+     * ISO 8601 timestamp indicating when the record was created.
+     */
     created: string;
     description?: string;
     display_name?: string;
+    /**
+     * Unique identifier for the record.
+     */
     id: string;
     included?: Array<PackageInclude>;
     instructions?: string;
@@ -48,6 +59,7 @@ export type Ticket = {
 export namespace Ticket {
     export enum type {
         ADMISSION = 'admission',
+        ADMISSION_TABLE_COMMITMENT = 'admission.tableCommitment',
         PACKAGE = 'package',
     }
 }
