@@ -2,14 +2,15 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { CostComponent } from './CostComponent';
 import type { OfferingCosts } from './OfferingCosts';
 import type { OfferingStatus } from './OfferingStatus';
 import type { OfferingType } from './OfferingType';
 import type { PackageInclude } from './PackageInclude';
 import type { PriceCategory } from './PriceCategory';
-import type { Schedule } from './Schedule';
 export type Offering = {
+    /**
+     * The maximum number of tickets that can be sold for this offering.
+     */
     capacity: number;
     /**
      * ISO 8601 timestamp indicating when the record was last updated, if applicable.
@@ -20,13 +21,6 @@ export type Offering = {
      * it can be time limit, quantity limit, etc...
      */
     constraints?: any;
-    /**
-     * Describe fees and other costs associated with purchasing tickets
-     * to this offering
-     *
-     * --@schema array(z.any()).optional()
-     */
-    costComponents?: Array<CostComponent>;
     costs: OfferingCosts;
     /**
      * ISO 8601 timestamp indicating when the record was created.
@@ -38,9 +32,18 @@ export type Offering = {
      * Unique identifier for the record.
      */
     id: string;
+    /**
+     * Items, products ,and vouchers included in this offering.
+     */
     included?: Array<PackageInclude>;
     instructions?: string;
+    /**
+     * Maximum number of tickets that can be purchased in a single order.
+     */
     maximumQuantity: number;
+    /**
+     * Minimum number of tickets that can be purchased in a single order.
+     */
     minimumQuantity: number;
     /**
      * Offering name, can be ticket name, vaucher name, etc...
@@ -50,7 +53,6 @@ export type Offering = {
     package?: boolean;
     priceCategory: PriceCategory;
     quantitySold: number;
-    schedule?: Schedule;
     sorting: number;
     status: OfferingStatus;
     type: OfferingType;

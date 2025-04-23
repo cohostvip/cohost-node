@@ -99,6 +99,9 @@ const request = ({ token, baseUrl = apiBaseUrl, debug = false }: RequestProps): 
     // Handle error responses
     if (!res.ok) {
       const message = typeof responseBody === "string" ? responseBody : JSON.stringify(responseBody);
+      console.error(`[Cohost SDK] Error: ${message}`, {
+        url
+      });
       throw new Error(`[Cohost SDK] ${res.status} ${res.statusText}: ${message}`);
     }
 

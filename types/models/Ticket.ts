@@ -2,26 +2,20 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { CostComponent } from './CostComponent';
 import type { OfferingCosts } from './OfferingCosts';
 import type { OfferingStatus } from './OfferingStatus';
 import type { PackageInclude } from './PackageInclude';
 import type { PriceCategory } from './PriceCategory';
-import type { Schedule } from './Schedule';
 export type Ticket = {
+    /**
+     * The maximum number of tickets that can be sold for this offering.
+     */
     capacity: number;
     category: string;
     /**
      * ISO 8601 timestamp indicating when the record was last updated, if applicable.
      */
     changed?: string;
-    /**
-     * Describe fees and other costs associated with purchasing tickets
-     * to this offering
-     *
-     * --@schema array(z.any()).optional()
-     */
-    costComponents?: Array<CostComponent>;
     costs: OfferingCosts;
     /**
      * ISO 8601 timestamp indicating when the record was created.
@@ -33,9 +27,18 @@ export type Ticket = {
      * Unique identifier for the record.
      */
     id: string;
+    /**
+     * Items, products ,and vouchers included in this offering.
+     */
     included?: Array<PackageInclude>;
     instructions?: string;
+    /**
+     * Maximum number of tickets that can be purchased in a single order.
+     */
     maximumQuantity: number;
+    /**
+     * Minimum number of tickets that can be purchased in a single order.
+     */
     minimumQuantity: number;
     /**
      * Offering name, can be ticket name, vaucher name, etc...
@@ -49,7 +52,6 @@ export type Ticket = {
     refId?: string;
     salesEnd: string;
     salesStart: string;
-    schedule?: Schedule;
     sorting: number;
     source: string;
     status: OfferingStatus;

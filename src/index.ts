@@ -1,4 +1,5 @@
 import { CohostClient, CohostClientOptions } from './client';
+export  { CohostClientSettings } from './settings';
 
 /**
  * Factory method for creating a CohostClient instance.
