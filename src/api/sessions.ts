@@ -90,6 +90,7 @@ export class SessionsAPI extends CohostEndpoint {
     }) {
         return this.request<CartSession>(`/cart/sessions/${sessionId}/item`, {
             method: 'POST',
+            data: props,
         });
     }
 

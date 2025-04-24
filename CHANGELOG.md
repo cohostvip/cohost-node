@@ -1,5 +1,11 @@
 # @cohostvip/cohost-node
 
+## 0.0.6
+
+### Patch Changes
+
+- Add `updateCartSession` method to `CohostCheckoutContext` for updating general `CartSession` fields.
+
 ## 0.0.5
 
 ### Patch Changes
