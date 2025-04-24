@@ -1,5 +1,11 @@
 # @cohostvip/cohost-node
 
+## 0.0.5
+
+### Patch Changes
+
+- feat(cart): add updateItem and deleteItem methods to CartSession API
+
 ## 0.0.4
 
 ### Patch Changes
