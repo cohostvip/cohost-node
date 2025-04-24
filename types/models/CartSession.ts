@@ -15,6 +15,7 @@ export type CartSession = {
      * ISO 8601 timestamp indicating when the record was last updated, if applicable.
      */
     changed?: string;
+    
     context: Partial_OrderContext_;
     /**
      * Namespaced identifier indicating what the order is associated with.
