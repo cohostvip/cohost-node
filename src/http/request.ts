@@ -53,12 +53,12 @@ const request = ({ token, baseUrl = apiBaseUrl, debug = false }: RequestProps): 
     // Construct query string from `query` object
     const queryString = query
       ? "?" +
-        new URLSearchParams(
-          Object.entries(query).reduce((acc, [key, value]) => {
-            if (value !== undefined) acc[key] = String(value);
-            return acc;
-          }, {} as Record<string, string>)
-        ).toString()
+      new URLSearchParams(
+        Object.entries(query).reduce((acc, [key, value]) => {
+          if (value !== undefined) acc[key] = String(value);
+          return acc;
+        }, {} as Record<string, string>)
+      ).toString()
       : "";
 
     const finalBaseUrl = runtimeOverrides.baseUrl ?? baseUrl;
@@ -120,4 +120,5 @@ const request = ({ token, baseUrl = apiBaseUrl, debug = false }: RequestProps): 
   };
 };
 
-export { request, RequestProps, RequestFn };
+export { type RequestProps, type RequestFn };
+export { request };

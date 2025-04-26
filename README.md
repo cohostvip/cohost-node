@@ -58,6 +58,17 @@ More endpoints coming soon.
 
 ---
 
+## 🗒️ Changelog
+See the latest changes [here](./CHANGELOG.md).
+
+---
+
+## 🚧 Roadmap
+Planned features and improvements are tracked [here](./ROADMAP.md).
+
+---
+
+
 ## 📄 License
 
 ISC © [Cohost](https://cohost.vip)

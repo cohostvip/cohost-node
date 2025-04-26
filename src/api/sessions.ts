@@ -1,8 +1,5 @@
+import { CartSession, UpdatableCartSession } from '../../types';
 import { CohostEndpoint } from '../endpoint';
-import {
-    CartSession,
-    UpdatableCartSession,
-} from '../../types/index';
 import { StartCartSessionInput } from '../types/sessions';
 
 /**
