@@ -1,5 +1,11 @@
 # @cohostvip/cohost-node
 
+## 0.0.9
+
+### Patch Changes
+
+- feat: support fetching order details
+
 ## 0.0.6
 
 ### Patch Changes
