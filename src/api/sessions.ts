@@ -50,7 +50,7 @@ export class SessionsAPI extends CohostEndpoint {
      * 
      * @throws Will throw an error if the update fails
      */
-    async update(id: string, input: UpdatableCartSession) {
+    async update(id: string, input: Partial<UpdatableCartSession>) {
         return this.request<CartSession>(`/cart/sessions/${id}`, {
             method: 'PATCH',
             data: input,
@@ -90,6 +90,36 @@ export class SessionsAPI extends CohostEndpoint {
             data: props,
         });
     }
+
+
+    /**
+     * Pre-validate and prepare the cart session for checkout.
+     * @param sessionId 
+     */
+    async preValidate(sessionId: string, data: any) {
+        return this.request<CartSession>(`/cart/sessions/${sessionId}/payment/pre-validate`, {
+            method: 'POST',
+            data: data,
+        });
+    }
+
+
+    /**
+     * Close the cart session, and place the order.
+     * 
+     * @param sessionId - The ID of the session
+     * @param data - Data to place the order
+     * @returns {CartSession} The latest cart session
+     * 
+     * @throws Will throw an error if the order placement fails
+     */
+    async placeOrder(sessionId: string, data: any) {
+        return this.request<CartSession>(`/cart/sessions/${sessionId}/place-order`, {
+            method: 'POST',
+            data: data,
+        });
+    }
+
 
     /**
      * Remove an item from the cart session.

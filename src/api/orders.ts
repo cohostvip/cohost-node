@@ -22,6 +22,6 @@ export class OrdersAPI extends CohostEndpoint {
    */
   async fetch(id: string, uid: string) {
     // uid is reserved for future scoped access/auth features
-    return this.request(`/orders/${id}`);
+    return this.request(`/orders/${id}?uid=${uid}`);
   }
 }
