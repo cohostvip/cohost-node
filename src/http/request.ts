@@ -1,5 +1,8 @@
+import { PaginatedRequest } from "../../types";
 import { apiBaseUrl } from "../apiVersion";
+import { CohostError } from "../error/CohostError";
 import { defaultSettings, runtimeOverrides } from "../settings";
+import { Pagination } from "../types/pagination";
 
 /**
  * Options for configuring the request handler.
@@ -20,18 +23,34 @@ interface RequestProps {
  */
 type RequestMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
 
+
+type RequestOptions = {
+  method?: RequestMethod;
+  data?: any;
+  query?: Record<string, string | number | boolean | undefined>;
+  headers?: Record<string, string>;
+  pagination?: Pagination;
+};
+
+
+export const paginatedOptions = (req: PaginatedRequest<any>, options?: Partial<RequestOptions>): RequestOptions => {
+  const { pagination, ...rest } = req;
+
+
+  return {
+    query: rest,
+    pagination,
+    ...options,
+  };
+}
+
 /**
  * A function that performs a request to the Cohost API.
  * The generic <T> allows you to specify the expected response type.
  */
 type RequestFn = <T = any>(
   path: string,
-  options?: {
-    method?: RequestMethod;
-    data?: any;
-    query?: Record<string, string | number | boolean | undefined>;
-    headers?: Record<string, string>;
-  }
+  options?: RequestOptions
 ) => Promise<T>;
 
 /**
@@ -41,25 +60,28 @@ type RequestFn = <T = any>(
 const request = ({ token, baseUrl = apiBaseUrl, debug = false }: RequestProps): RequestFn => {
   return async function <T = any>(
     path: string,
-    options: {
-      method?: RequestMethod;
-      data?: any;
-      query?: Record<string, string | number | boolean | undefined>;
-      headers?: Record<string, string>;
-    } = {}
+    options: RequestOptions = {}
   ): Promise<T> {
-    const { method = "GET", data, query, headers = {} } = options;
+    const { method = "GET", data, query, pagination, headers = {} } = options;
+
+    let _query = {
+      ...query,
+      ...pagination,
+    };
+
 
     // Construct query string from `query` object
-    const queryString = query
+    const queryString = _query
       ? "?" +
       new URLSearchParams(
-        Object.entries(query).reduce((acc, [key, value]) => {
+        Object.entries(_query).reduce((acc, [key, value]) => {
           if (value !== undefined) acc[key] = String(value);
           return acc;
         }, {} as Record<string, string>)
       ).toString()
       : "";
+
+
 
     const finalBaseUrl = runtimeOverrides.baseUrl ?? baseUrl;
     const url = `${finalBaseUrl}${path}${queryString}`;
@@ -102,7 +124,13 @@ const request = ({ token, baseUrl = apiBaseUrl, debug = false }: RequestProps): 
       console.error(`[Cohost SDK] Error: ${message}`, {
         url
       });
-      throw new Error(`[Cohost SDK] ${res.status} ${res.statusText}: ${message}`);
+
+
+      throw new CohostError(message || res.statusText, {
+        errorCode: res.statusText || "API_ERROR",
+        statusCode: res.status,
+      });
+
     }
 
     // If wrapped response structure with { status: 'ok', data }, return `data`

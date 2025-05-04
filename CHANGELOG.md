@@ -1,5 +1,11 @@
 # @cohostvip/cohost-node
 
+## 0.0.10
+
+### Patch Changes
+
+- Add `events.attendees()` to fetch attendees for event.
+
 ## 0.0.9
 
 ### Patch Changes

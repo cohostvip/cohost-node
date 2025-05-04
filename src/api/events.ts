@@ -1,7 +1,8 @@
 // src/api/EventsAPI.ts
 
 import { CohostEndpoint } from '../endpoint';
-import { EventProfile, Ticket } from '../../types/index';
+import { Attendee3, EventProfile, PaginatedRequest, PaginatedResponse, Ticket } from '../../types/index';
+import { paginatedOptions } from '../http/request';
 
 /**
  * Provides methods to interact with the Cohost Events API.
@@ -52,4 +53,17 @@ export class EventsAPI extends CohostEndpoint {
   async tickets(id: string) {
     return this.request<Ticket[]>(`/events/${id}/tickets`);
   }
+
+  /**
+   * List attendees in the event.
+   *
+   * Requires: valid authentication token. This endpoint is not public.
+   * 
+   * @param id - The ID of the event.
+   * @returns List of tickets (attendees) for the event.
+   */
+  async attendees(id: string, filters?: PaginatedRequest<any>) {
+    return this.request<PaginatedResponse<Attendee3>>(`/events/${id}/attendees`, paginatedOptions(filters));
+  }
+
 }

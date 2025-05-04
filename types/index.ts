@@ -70,6 +70,27 @@ export interface Schedule {
 	includeDates?: string[];
 }
 /**
+ * Pagination parameters for a paginated API request.
+ */
+export interface Pagination {
+	/** Number of results per page. */
+	size: number;
+	/** Page number (starting from 1). */
+	page: number;
+	/** Continuation */
+	continuation?: string;
+}
+export interface PaginationResponse extends Pagination {
+	/** Total number of results available. */
+	total: number;
+}
+export type PaginatedResponse<T> = {
+	/** Array of results. */
+	results: T[];
+	/** Pagination metadata. */
+	pagination: PaginationResponse;
+};
+/**
  * Base metadata for any record stored in the system.
  * Includes an ID and timestamps for creation and optional updates.
  *
@@ -131,6 +152,15 @@ export type TimeOrOffset = {
 	 */
 	secondsBefore: number;
 	date?: never;
+};
+/**
+ * A request structure that includes both query parameters and pagination.
+ *
+ * @ignore
+ */
+export type PaginatedRequest<T> = T & {
+	/** Pagination settings. */
+	pagination: Pagination;
 };
 /**
  * @description A string representing a currency amount in the format `"USD,1000"` where:
@@ -402,6 +432,44 @@ export interface Ticket extends Omit<Offering, "hidden" | "constraints" | "type"
 	parentId?: string;
 	refId?: string;
 }
+/**
+ * Person interface
+ */
+export interface Person {
+	name: string;
+	photoURL?: string | null;
+	displayName: string;
+	first: string;
+	last: string;
+	gender: null | string | "male" | "female" | "other";
+	birthdate?: string | null;
+	age?: number;
+}
+export interface PersonContact {
+	email: string | null;
+	phone: string | null;
+}
+export type Customer = Person & PersonContact & {
+	uid: string | null;
+};
+export type AttendeeStatus = "attending" | "checkedIn" | "cancelled" | "refunded" | "noShow" | "unknown" | string;
+export interface Attendee3 extends DataRecord {
+	/**
+	 * Order ID, from /orders/:orderId
+	 */
+	orderId: string;
+	/**
+	 * For event it will be the ticket's id
+	 */
+	offeringId: string;
+	offeringSnapshot: Partial<Offering>;
+	profile: Customer | null;
+	checkedIn: boolean;
+	barcodes: string[];
+	version: ApiVersion;
+	status: AttendeeStatus | string;
+	index: number;
+}
 export interface BuzzBuilder {
 	countLabel: string;
 	profiles: {
@@ -548,6 +616,21 @@ export interface VenueBase {
 	address: Address | null;
 	slug: string | null;
 }
+export interface Venue extends VenueBase {
+	claimed: boolean;
+	refId?: string;
+	description?: MultipartText;
+	capacity?: number | null;
+	types: string[];
+	photos?: Photo[];
+	hoursOfOperation: string[];
+	phoneNumber?: string | null;
+	priceLevel: number | null;
+	rating: {
+		google: number | null;
+	};
+	[key: string]: any;
+}
 /**
  * @description Status of the event lifecycle.
  *
@@ -560,8 +643,7 @@ export interface VenueBase {
  * - `canceled`: The event was canceled and is no longer active.
  */
 export type EventStatus = "archived" | "draft" | "live" | "started" | "ended" | "completed" | "canceled";
-export interface EventBase {
-	id: string;
+export interface EventBase extends DataRecord {
 	/**
 	 * @example "Spring Concert"
 	 * @faker name.firstName
@@ -611,6 +693,7 @@ export interface EventBase {
 	 */
 	public: boolean;
 	location?: Location;
+	organizerId: string;
 }
 /**
  * @openapi
@@ -735,60 +818,6 @@ export interface Coupon extends VersionedDataRecord {
 	version: ApiVersion;
 }
 /**
- * Captures metadata and request/session context at the time the cart is created.
- * Supports fraud detection, attribution, analytics, and partner session tracking.
- *
- * This interface is extensible — additional custom fields may be included as needed.
- *
- * @export
- */
-export interface OrderContext {
-	/**
-	 * IP addresses associated with the user request.
-	 * Typically includes forwarded IPs and direct client IP.
-	 * @example ["203.0.113.1", "10.0.0.1"]
-	 */
-	ipAddresses: string[];
-	/**
-	 * Raw User-Agent header from the client request.
-	 * @example "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)..."
-	 */
-	userAgent: string;
-	/**
-	 * The referring URL from which the cart or checkout was initiated.
-	 * May be a partner site, marketing page, or event listing.
-	 * @example "https://partner.example.com/tickets/event123"
-	 */
-	referrer: string;
-	/**
-	 * Authenticated user ID, or null for anonymous guests.
-	 * @example "uid_456def"
-	 */
-	uid: string | null;
-	/**
-	 * The unique cart session ID assigned at the time the cart was created.
-	 * Helps track cart attribution across systems.
-	 * @example "cart_sess_abc123"
-	 */
-	cartSessionId: string;
-	/**
-	 * (Optional) Origin domain name if embedded or white-labeled.
-	 * Can help identify partner portals or iframe referrers.
-	 * @example "examplepartner.com"
-	 */
-	originDomain?: string;
-	/**
-	 * (Optional) Campaign ID, UTM source, or tracking label.
-	 * Useful for affiliate and analytics systems.
-	 * @example "utm_campaign=spring_launch"
-	 */
-	trackingId?: string;
-	/**
-	 * Allows custom fields for analytics, partners, or experiment data.
-	 */
-	[custom: string]: unknown;
-}
-/**
  * Cost breakdown for a specific item in the order.
  * Extends the standard `OfferingCosts` with totals calculated for quantity and discounts.
  *
@@ -869,25 +898,64 @@ export interface OrderItemOffering extends Pick<Offering, "name" | "costs" | "ty
 	docPath: string;
 }
 /**
- * Person interface
+ * Represents the resolved context associated with a cart session.
+ * This may be an event, venue, or organizer, and is used to enrich the cart with metadata
+ * needed for UI rendering and pricing logic without requiring repeated DB lookups.
+ *
+ * Typically stored in `cart.meta.resolvedContext`.
+ *
+ * @export
  */
-export interface Person {
-	name: string;
-	photoURL?: string | null;
-	displayName: string;
-	first: string;
-	last: string;
-	gender: null | string | "male" | "female" | "other";
-	birthdate?: string | null;
-	age?: number;
+export interface ResolvedCartContext {
+	/**
+	 * Unique identifier of the context entity.
+	 * Typically matches the cart's `contextId` (e.g., "evt_abc123").
+	 * @example "evt_abc123"
+	 */
+	id: string;
+	/**
+	 * Human-readable title or name of the context entity.
+	 * Used for display in headers, summaries, and confirmations.
+	 * @example "Downtown Comedy Night"
+	 */
+	title: string;
+	/**
+	 * Optional physical or virtual location of the event or venue.
+	 * Can include address, coordinates, or virtual link.
+	 */
+	location?: Location;
+	/**
+	 * Optional logo, banner, or primary image representing the context.
+	 * Used in UI to visually identify the entity during checkout.
+	 */
+	logo?: Photo;
+	/**
+	 * Optional description or summary of the context entity.
+	 * Provides additional information to the customer during checkout.
+	 * @example "Join us for a night of laughter with top comedians!"
+	 */
+	start: string;
+	/**
+	 * Optional end date or time of the event or context entity.
+	 * Useful for events with a specific duration or schedule.
+	 * @example "2023-10-15T22:00:00Z"
+	 */
+	end?: string;
+	/**
+	 * A map of offerings relevant to this context (e.g., ticket types, merch).
+	 * Stored as a record keyed by offering ID to allow fast lookup.
+	 * Each value is a partial offering object, intended for display, validation, or pricing.
+	 * @example {
+	 *   "off_123abc": { path: "events/ev_1234/tickets/tkt_567", offering: { name: "VIP Ticket", price: 3000 }),
+	 *   "off_456def": { path: "events/ev_1234/tickets/tkt_567", offering: { name: "T-Shirt", price: 2000 }}
+	 * }
+	 */
+	offerings?: Record<string, ResolvedCartContextOffering>;
 }
-export interface PersonContact {
-	email: string | null;
-	phone: string | null;
+export interface ResolvedCartContextOffering {
+	path: string;
+	offering: Offering;
 }
-export type Customer = Person & PersonContact & {
-	uid: string | null;
-};
 export type CouponSummary = Pick<Coupon, "id" | "code" | "amountOff" | "percentOff" | "offeringIds">;
 export type OrderStatus = "placed" | "completed" | "attending" | "cancelled" | "refunded" | "started" | "pending" | "abandoned";
 export interface OrderCosts {
@@ -924,6 +992,7 @@ export interface Order extends VCDataRecord {
 	 * Supports multiple entries based on organizer preferences.
 	 */
 	coupons?: CouponSummary[];
+	organizerId: string;
 	/**
 	 * Namespaced identifier indicating what the order is associated with.
 	 * Format: "{type}_{id}", where type is "evt", "ven", or "org".
@@ -991,119 +1060,6 @@ export interface Order extends VCDataRecord {
 	 * May include fulfillment flags, debugging info, or derived calculations.
 	 * @example { preview: true, manuallyAdjusted: true }
 	 */
-	meta: any;
-	/**
-	 * Session and request context captured at the time of order creation.
-	 * Includes IPs, referrer, user agent, cart session ID, and tracking info.
-	 */
-	context: OrderContext;
-	version: ApiVersion;
-}
-/**
- * Represents the resolved context associated with a cart session.
- * This may be an event, venue, or organizer, and is used to enrich the cart with metadata
- * needed for UI rendering and pricing logic without requiring repeated DB lookups.
- *
- * Typically stored in `cart.meta.resolvedContext`.
- *
- * @export
- */
-export interface ResolvedCartContext {
-	/**
-	 * Unique identifier of the context entity.
-	 * Typically matches the cart's `contextId` (e.g., "evt_abc123").
-	 * @example "evt_abc123"
-	 */
-	id: string;
-	/**
-	 * Human-readable title or name of the context entity.
-	 * Used for display in headers, summaries, and confirmations.
-	 * @example "Downtown Comedy Night"
-	 */
-	title: string;
-	/**
-	 * Optional physical or virtual location of the event or venue.
-	 * Can include address, coordinates, or virtual link.
-	 */
-	location?: Location;
-	/**
-	 * Optional logo, banner, or primary image representing the context.
-	 * Used in UI to visually identify the entity during checkout.
-	 */
-	logo?: Photo;
-	/**
-	 * A map of offerings relevant to this context (e.g., ticket types, merch).
-	 * Stored as a record keyed by offering ID to allow fast lookup.
-	 * Each value is a partial offering object, intended for display, validation, or pricing.
-	 * @example {
-	 *   "off_123abc": { path: "events/ev_1234/tickets/tkt_567", offering: { name: "VIP Ticket", price: 3000 }),
-	 *   "off_456def": { path: "events/ev_1234/tickets/tkt_567", offering: { name: "T-Shirt", price: 2000 }}
-	 * }
-	 */
-	offerings?: Record<string, ResolvedCartContextOffering>;
-}
-export interface ResolvedCartContextOffering {
-	path: string;
-	offering: Offering;
-}
-/**
- * Represents a temporary or persisted cart before order placement.
- * Focuses on user intent and checkout prep, not post-purchase records.
- *
- * @export
- */
-export interface CartSession extends DataRecord, Pick<Order, "currency" | "contextId" | "version" | "coupons"> {
-	/**
-	 * Authenticated user ID, if available.
-	 * @example "uid_123abc"
-	 */
-	uid: string | null;
-	/**
-	 * Optional snapshot of customer info entered during cart fill.
-	 * Not required and not final.
-	 *
-	 * @schema lazy(() => customerSchema).optional()
-	 */
-	customer?: Partial<Customer>;
-	/**
-	 * @schema lazy(() => orderContextSchema).optional()
-	 */
-	context: Partial<OrderContext>;
-	/**
-	 * Items the user has added to their cart.
-	 */
-	items: Partial<OrderItem>[];
-	/**
-	 * Estimated totals based on current cart state.
-	 * These values are subject to recalculation before checkout.
-	 */
-	costs?: {
-		subtotal: CurrencyAmount;
-		discount: CurrencyAmount;
-		tax: CurrencyAmount;
-		fee: CurrencyAmount;
-		delivery: CurrencyAmount;
-		total: CurrencyAmount;
-	};
-	/**
-	 * Stripe PaymentIntent ID linked to this cart, if created.
-	 * Used for confirming payment on the backend.
-	 * @example "pi_1ABCXYZ..."
-	 */
-	paymentIntentId?: string;
-	/**
-	 * Stripe PaymentIntent client secret, used by frontend (e.g. Stripe.js).
-	 * Required for completing the payment flow.
-	 * @example "pi_1ABCXYZ..._secret_456"
-	 */
-	paymentIntentClientSecret?: string;
-	/**
-	 * Partner-forwarded data (e.g. utm, session metadata).
-	 */
-	forwarded?: any;
-	/**
-	 * Internal metadata, flags, debug hints, or experimental context.
-	 */
 	meta: {
 		/**
 		 * Display context (event, venue, organizer) for rendering and logic.
@@ -1129,6 +1085,125 @@ export interface CartSession extends DataRecord, Pick<Order, "currency" | "conte
 		 */
 		[key: string]: any;
 	};
+	/**
+	 * Session and request context captured at the time of order creation.
+	 * Includes IPs, referrer, user agent, cart session ID, and tracking info.
+	 */
+	context: OrderContext;
+	version: ApiVersion;
+}
+export type OrderContext = {
+	type: "event";
+	event: EventProfile;
+	venue?: Venue;
+} | {
+	type: "venue";
+	event?: EventProfile;
+	venue: Venue;
+};
+interface OrderContext$1 {
+	/**
+	 * IP addresses associated with the user request.
+	 * Typically includes forwarded IPs and direct client IP.
+	 * @example ["203.0.113.1", "10.0.0.1"]
+	 */
+	ipAddresses: string[];
+	/**
+	 * Raw User-Agent header from the client request.
+	 * @example "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)..."
+	 */
+	userAgent: string;
+	/**
+	 * The referring URL from which the cart or checkout was initiated.
+	 * May be a partner site, marketing page, or event listing.
+	 * @example "https://partner.example.com/tickets/event123"
+	 */
+	referrer: string;
+	/**
+	 * Authenticated user ID, or null for anonymous guests.
+	 * @example "uid_456def"
+	 */
+	uid: string | null;
+	/**
+	 * The unique cart session ID assigned at the time the cart was created.
+	 * Helps track cart attribution across systems.
+	 * @example "cart_sess_abc123"
+	 */
+	cartSessionId: string;
+	/**
+	 * (Optional) Origin domain name if embedded or white-labeled.
+	 * Can help identify partner portals or iframe referrers.
+	 * @example "examplepartner.com"
+	 */
+	originDomain?: string;
+	/**
+	 * (Optional) Campaign ID, UTM source, or tracking label.
+	 * Useful for affiliate and analytics systems.
+	 * @example "utm_campaign=spring_launch"
+	 */
+	trackingId?: string;
+	/**
+	 * Allows custom fields for analytics, partners, or experiment data.
+	 */
+	[custom: string]: unknown;
+}
+/**
+ * Represents a temporary or persisted cart before order placement.
+ * Focuses on user intent and checkout prep, not post-purchase records.
+ *
+ * @export
+ */
+export interface CartSession extends DataRecord, Pick<Order, "currency" | "contextId" | "version" | "coupons" | "companyId" | "organizerId" | "meta"> {
+	orderId?: string;
+	/**
+	 * Authenticated user ID, if available.
+	 * @example "uid_123abc"
+	 */
+	uid: string | null;
+	/**
+	 * Optional snapshot of customer info entered during cart fill.
+	 * Not required and not final.
+	 *
+	 * @schema lazy(() => customerSchema).optional()
+	 */
+	customer?: Partial<Customer>;
+	/**
+	 * @schema lazy(() => orderContextSchema).optional()
+	 */
+	context: Partial<OrderContext$1>;
+	/**
+	 * Items the user has added to their cart.
+	 */
+	items: Partial<OrderItem>[];
+	/**
+	 * Estimated totals based on current cart state.
+	 * These values are subject to recalculation before checkout.
+	 */
+	costs?: {
+		subtotal: CurrencyAmount;
+		discount: CurrencyAmount;
+		tax: CurrencyAmount;
+		fee: CurrencyAmount;
+		delivery: CurrencyAmount;
+		total: CurrencyAmount;
+	};
+	paymentStatus: "pending" | "confirmed" | "failed" | "refunded";
+	/**
+	 * Stripe PaymentIntent ID linked to this cart, if created.
+	 * Used for confirming payment on the backend.
+	 * @example "pi_1ABCXYZ..."
+	 */
+	paymentIntentId?: string;
+	/**
+	 * Stripe PaymentIntent client secret, used by frontend (e.g. Stripe.js).
+	 * Required for completing the payment flow.
+	 * @example "pi_1ABCXYZ..._secret_456"
+	 */
+	paymentIntentClientSecret?: string;
+	/**
+	 * Partner-forwarded data (e.g. utm, session metadata).
+	 */
+	forwarded?: any;
 	status: "started" | "completed" | "abandoned" | "cancelled";
 }
 export type UpdatableCartSession = Pick<CartSession, "customer" | "items">;
