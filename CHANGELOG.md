@@ -1,5 +1,11 @@
 # @cohostvip/cohost-node
 
+## 0.0.11
+
+### Patch Changes
+
+- Fixed the types export
+
 ## 0.0.10
 
 ### Patch Changes
