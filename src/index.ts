@@ -1,5 +1,5 @@
 import { CohostClient, CohostClientOptions } from './client';
-export  { type CohostClientSettings } from './settings';
+export { type CohostClientSettings } from './settings';
 
 /**
  * Factory method for creating a CohostClient instance.
@@ -15,3 +15,5 @@ export function createCohostClient(options: CohostClientOptions): CohostClient {
 
 
 export { CohostClient }
+
+export * from '../types';
