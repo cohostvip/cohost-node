@@ -396,7 +396,7 @@ export interface Offering extends DataRecord {
 	 *
 	 * @x-faker {"array.length": 0}
 	 */
-	included?: PackageInclude[];
+	includes?: PackageInclude[];
 	/**
 	 * Any constraints that apply to this offering.
 	 * it can be time limit, quantity limit, etc...
@@ -418,7 +418,10 @@ export interface PackageInclude {
 	quantity: number;
 	type: OfferingType;
 	description: string;
-	ref?: any;
+	/**
+	 * path to the offering doc in the db.
+	 */
+	refPath?: string;
 }
 export interface Ticket extends Omit<Offering, "hidden" | "constraints" | "type"> {
 	category: string;
@@ -889,7 +892,7 @@ export interface OrderItem {
 	meta: any;
 	offering: OrderItemOffering;
 }
-export interface OrderItemOffering extends Pick<Offering, "name" | "costs" | "type"> {
+export interface OrderItemOffering extends Pick<Offering, "name" | "costs" | "type" | "includes"> {
 	/**
 	 * doc assicated with this offering in the DB.
 	 *

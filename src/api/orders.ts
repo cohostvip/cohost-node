@@ -1,5 +1,3 @@
-// src/api/OrdersAPI.ts
-
 import { CohostEndpoint } from '../endpoint';
 
 /**
@@ -9,9 +7,11 @@ import { CohostEndpoint } from '../endpoint';
  * ```ts
  * const client = new CohostClient({ token: 'your-token' });
  * const order = await client.orders.fetch('order-id', 'user-id');
+ * const list = await client.orders.list({ status: 'completed' });
  * ```
  */
 export class OrdersAPI extends CohostEndpoint {
+
   /**
    * Fetch a single order by ID.
    * 
@@ -23,5 +23,23 @@ export class OrdersAPI extends CohostEndpoint {
   async fetch(id: string, uid: string) {
     // uid is reserved for future scoped access/auth features
     return this.request(`/orders/${id}?uid=${uid}`);
+  }
+
+  /**
+   * List orders with optional filters.
+   * 
+   * @param filters - Optional filters to apply when retrieving orders
+   * @returns A Promise resolving to an array of order summaries
+   * @throws Will throw an error if the request fails
+   */
+  async list(filters?: {
+    status?: string;
+    startDate?: string;
+    endDate?: string;
+    page?: number;
+    pageSize?: number;
+  }) {
+    const query = new URLSearchParams(filters as Record<string, string>).toString();
+    return this.request(`/orders${query ? `?${query}` : ''}`);
   }
 }
