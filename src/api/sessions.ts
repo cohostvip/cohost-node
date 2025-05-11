@@ -1,6 +1,6 @@
 import { CartSession, UpdatableCartSession } from '../../types';
 import { CohostEndpoint } from '../endpoint';
-import { StartCartSessionInput } from '../types/sessions';
+import { FindTablesProps, StartCartSessionInput, ViableTableOption } from '../types/sessions';
 
 /**
  * Provides methods to interact with cart sessions in the Cohost API.
@@ -82,8 +82,11 @@ export class SessionsAPI extends CohostEndpoint {
      * @throws Will throw an error if the update fails
      */
     async updateItem(sessionId: string, props: {
-        offeringId: string;
+        itemId: string;
         quantity: number;
+        options?: {
+            [key: string]: any;
+        };
     }) {
         return this.request<CartSession>(`/cart/sessions/${sessionId}/item`, {
             method: 'POST',
@@ -129,10 +132,19 @@ export class SessionsAPI extends CohostEndpoint {
      * @param offeringId 
      * @returns {CartSession} The latest cart session
      */
-    async deleteItem(sessionId: string, offeringId: string) {
+    async deleteItem(sessionId: string, itemId: string) {
         return this.updateItem(sessionId, {
-            offeringId,
+            itemId,
             quantity: 0,
+        });
+    }
+
+
+    async findTables(id: string, props: FindTablesProps): Promise<ViableTableOption[]> {
+        return this.request<ViableTableOption[]>(`/cart/tables/find-tables/${id}`, {
+            query: {
+                ...props,
+            }
         });
     }
 

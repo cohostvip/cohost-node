@@ -66,4 +66,6 @@ export class EventsAPI extends CohostEndpoint {
     return this.request<PaginatedResponse<Attendee3>>(`/events/${id}/attendees`, paginatedOptions(filters));
   }
 
+ 
+
 }

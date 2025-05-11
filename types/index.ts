@@ -342,7 +342,7 @@ export interface CalculatedCostComponent extends Omit<CostComponent, "ops" | "ca
 /**
  * @zod .string()
  */
-export type OfferingType = "admission" | "package" | "skip" | "drink" | "ticket" | "tc-ticket" | "merch" | "donation" | "membership" | "voucher" | "service" | "other";
+export type OfferingType = "admission" | "admission.tableCommitment" | "package" | "skip" | "drink" | "ticket" | "tc-ticket" | "merch" | "donation" | "membership" | "voucher" | "service" | "other";
 export type ActiveOfferingStatus = "live" | "hidden" | "sold-out";
 export type OfferingStatus = ActiveOfferingStatus | "draft" | "deleted" | "unavailable";
 export type PriceCategory = "donation" | "free" | "paid" | "other";
@@ -406,12 +406,30 @@ export interface Offering extends DataRecord {
 	order_confirmation_message?: string | null;
 	costs: OfferingCosts;
 	/**
+	 * @description The group this offering belongs to.
+	 *
+	 * @example "General Admission" (ticket) | "T-shirt" (merch) | "Donation" (donation) | "Membership" (membership) | "Gift Card" (voucher) | "Service Fee" (service) | "Other" (other)
+	 */
+	options?: OfferingOptionsGroup[];
+	/**
 	 * Describe fees and other costs associated with purchasing tickets
 	 * to this offering
 	 *
 	 * @ignore
 	 */
 	costComponents?: CostComponent[];
+}
+export interface OfferingOptionsGroup {
+	id: string;
+	name: string;
+	hash?: string;
+	options: OfferingOption[];
+}
+export interface OfferingOption {
+	key: string;
+	description: string;
+	value: string | number;
+	meta?: any;
 }
 export interface PackageInclude {
 	id: string;
@@ -890,15 +908,17 @@ export interface OrderItem {
 	 * @example { "customField": "value" }
 	 */
 	meta: any;
+	options: any | null;
 	offering: OrderItemOffering;
 }
-export interface OrderItemOffering extends Pick<Offering, "name" | "costs" | "type" | "includes"> {
+export interface OrderItemOffering extends Pick<Offering, "id" | "name" | "type" | "includes"> {
+	costs?: OfferingCosts;
 	/**
 	 * doc assicated with this offering in the DB.
 	 *
 	 * @example "events/1234567890/tickets/0987654321"
 	 */
-	docPath: string;
+	refPath: string;
 }
 /**
  * Represents the resolved context associated with a cart session.
@@ -1150,6 +1170,9 @@ interface OrderContext$1 {
 	 */
 	[custom: string]: unknown;
 }
+export type CartSessionItem = Pick<OrderItem, "id" | "offeringId" | "quantity" | "options" | "offering"> & {
+	costs?: OrderItemCosts;
+};
 /**
  * Represents a temporary or persisted cart before order placement.
  * Focuses on user intent and checkout prep, not post-purchase records.
@@ -1177,7 +1200,7 @@ export interface CartSession extends DataRecord, Pick<Order, "currency" | "conte
 	/**
 	 * Items the user has added to their cart.
 	 */
-	items: Partial<OrderItem>[];
+	items: CartSessionItem[];
 	/**
 	 * Estimated totals based on current cart state.
 	 * These values are subject to recalculation before checkout.

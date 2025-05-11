@@ -23,26 +23,42 @@ interface RequestProps {
  */
 type RequestMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
 
-
 type RequestOptions = {
   method?: RequestMethod;
   data?: any;
-  query?: Record<string, string | number | boolean | undefined>;
+  query?: Record<string, string | number | boolean | string[] | undefined>;
   headers?: Record<string, string>;
   pagination?: Pagination;
 };
 
-
 export const paginatedOptions = (req: PaginatedRequest<any>, options?: Partial<RequestOptions>): RequestOptions => {
   const { pagination, ...rest } = req;
-
-
   return {
     query: rest,
     pagination,
     ...options,
   };
-}
+};
+
+/**
+ * Builds a query string from a flat object, supporting array values via repeated keys.
+ */
+const buildQueryString = (
+  input?: Record<string, string | number | boolean | string[] | undefined>
+): string => {
+  if (!input) return "";
+
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(input)) {
+    if (value === undefined) continue;
+    if (Array.isArray(value)) {
+      value.forEach((v) => params.append(key, String(v)));
+    } else {
+      params.set(key, String(value));
+    }
+  }
+  return params.toString() ? `?${params.toString()}` : "";
+};
 
 /**
  * A function that performs a request to the Cohost API.
@@ -64,44 +80,27 @@ const request = ({ token, baseUrl = apiBaseUrl, debug = false }: RequestProps): 
   ): Promise<T> {
     const { method = "GET", data, query, pagination, headers = {} } = options;
 
-    let _query = {
+    const _query = {
       ...query,
       ...pagination,
     };
 
-
-    // Construct query string from `query` object
-    const queryString = _query
-      ? "?" +
-      new URLSearchParams(
-        Object.entries(_query).reduce((acc, [key, value]) => {
-          if (value !== undefined) acc[key] = String(value);
-          return acc;
-        }, {} as Record<string, string>)
-      ).toString()
-      : "";
-
-
-
+    const queryString = buildQueryString(_query);
     const finalBaseUrl = runtimeOverrides.baseUrl ?? baseUrl;
     const url = `${finalBaseUrl}${path}${queryString}`;
 
-    // Merge default, runtime, and per-request headers
     const reqHeaders: Record<string, string> = {
       ...defaultSettings.headers,
       ...runtimeOverrides.headers,
       ...headers,
     };
 
-    // Add Authorization header if token is present
     if (token) {
       reqHeaders["Authorization"] = `Bearer ${token}`;
     }
 
-    // Only send body if method allows it
     const body = data && method !== "GET" ? JSON.stringify(data) : undefined;
 
-    // Optional debug logging
     if (debug) {
       console.log(`[Cohost SDK] Request: ${method} ${url}`);
       if (body) console.log(`[Cohost SDK] Body:`, body);
@@ -114,26 +113,18 @@ const request = ({ token, baseUrl = apiBaseUrl, debug = false }: RequestProps): 
       body,
     });
 
-    // Parse the response based on content type
     const isJson = res.headers.get("content-type")?.includes("application/json");
     const responseBody = isJson ? await res.json() : await res.text();
 
-    // Handle error responses
     if (!res.ok) {
       const message = typeof responseBody === "string" ? responseBody : JSON.stringify(responseBody);
-      console.error(`[Cohost SDK] Error: ${message}`, {
-        url
-      });
-
-
+      console.error(`[Cohost SDK] Error: ${message}`, { url });
       throw new CohostError(message || res.statusText, {
         errorCode: res.statusText || "API_ERROR",
         statusCode: res.status,
       });
-
     }
 
-    // If wrapped response structure with { status: 'ok', data }, return `data`
     if (
       typeof responseBody === "object" &&
       responseBody !== null &&
@@ -143,7 +134,6 @@ const request = ({ token, baseUrl = apiBaseUrl, debug = false }: RequestProps): 
       return (responseBody as { data: T }).data;
     }
 
-    // Fallback for raw/unwrapped responses
     return responseBody as T;
   };
 };

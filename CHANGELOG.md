@@ -1,5 +1,11 @@
 # @cohostvip/cohost-node
 
+## 0.1.0
+
+### Minor Changes
+
+- Cart supports table commitment, and packages
+
 ## 0.0.12
 
 ### Patch Changes
