@@ -1,5 +1,11 @@
 # @cohostvip/cohost-node
 
+## 0.1.1
+
+### Patch Changes
+
+- Can join existing table commitment
+
 ## 0.1.0
 
 ### Minor Changes

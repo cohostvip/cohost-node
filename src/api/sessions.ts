@@ -13,7 +13,6 @@ import { FindTablesProps, StartCartSessionInput, ViableTableOption } from '../ty
  */
 export class SessionsAPI extends CohostEndpoint {
 
-
     /**
      * Start a new cart session.
      *
@@ -62,6 +61,7 @@ export class SessionsAPI extends CohostEndpoint {
      *
      * @param id - The ID of the session to cancel
      * @returns Nothing if successful
+     * 
      * @throws Will throw an error if the cancel operation fails
      */
     async cancel(id: string) {
@@ -69,8 +69,6 @@ export class SessionsAPI extends CohostEndpoint {
             method: 'DELETE',
         });
     }
-
-
 
     /**
      * Update an item in the cart session.
@@ -94,10 +92,14 @@ export class SessionsAPI extends CohostEndpoint {
         });
     }
 
-
     /**
-     * Pre-validate and prepare the cart session for checkout.
-     * @param sessionId 
+     * Pre-validate the cart session for payment and checkout.
+     *
+     * @param sessionId - The ID of the cart session
+     * @param data - Data required for validation
+     * @returns {CartSession} The validated cart session
+     * 
+     * @throws Will throw an error if validation fails
      */
     async preValidate(sessionId: string, data: any) {
         return this.request<CartSession>(`/cart/sessions/${sessionId}/payment/pre-validate`, {
@@ -105,7 +107,6 @@ export class SessionsAPI extends CohostEndpoint {
             data: data,
         });
     }
-
 
     /**
      * Close the cart session, and place the order.
@@ -123,13 +124,12 @@ export class SessionsAPI extends CohostEndpoint {
         });
     }
 
-
     /**
      * Remove an item from the cart session.
      * The same as setting the quantity to 0.
      * 
-     * @param sessionId 
-     * @param offeringId 
+     * @param sessionId - The ID of the cart session
+     * @param itemId - The ID of the item to remove
      * @returns {CartSession} The latest cart session
      */
     async deleteItem(sessionId: string, itemId: string) {
@@ -139,7 +139,15 @@ export class SessionsAPI extends CohostEndpoint {
         });
     }
 
-
+    /**
+     * Find available table options for a given cart session.
+     *
+     * @param id - The ID of the cart session
+     * @param props - Filter parameters for finding tables
+     * @returns {ViableTableOption[]} List of valid table options
+     * 
+     * @throws Will throw an error if the request fails
+     */
     async findTables(id: string, props: FindTablesProps): Promise<ViableTableOption[]> {
         return this.request<ViableTableOption[]>(`/cart/tables/find-tables/${id}`, {
             query: {
@@ -148,4 +156,21 @@ export class SessionsAPI extends CohostEndpoint {
         });
     }
 
+    /**
+     * Join a table commitment within an active cart session.
+     *
+     * @param id - The ID of the cart session
+     * @param tableCommitmentId - The table commitment ID to join
+     * @returns {CartSession} Updated cart session with joined table
+     * 
+     * @throws Will throw an error if the join operation fails
+     */
+    async joinTableCommitment(id: string, tableCommitmentId: string): Promise<CartSession> {
+        return this.request<CartSession>(`/cart/sessions/${id}/join-table`, {
+            method: 'POST',
+            data: {
+                tableCommitmentId,
+            }
+        });
+    }
 }

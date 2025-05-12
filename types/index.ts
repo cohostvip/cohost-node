@@ -873,6 +873,13 @@ export interface OrderItem {
 	 * @example "item_abc123"
 	 */
 	id: string;
+	tableCommitmentId: string | null;
+	tableCommitment?: {
+		id: string;
+		groupSize: number;
+		ticketsPurchased: number;
+		completed: boolean;
+	};
 	/**
 	 * Type of offering (e.g., ticket, package, merch).
 	 * @example "ticket"
@@ -908,10 +915,11 @@ export interface OrderItem {
 	 * @example { "customField": "value" }
 	 */
 	meta: any;
+	details: string | null;
 	options: any | null;
 	offering: OrderItemOffering;
 }
-export interface OrderItemOffering extends Pick<Offering, "id" | "name" | "type" | "includes"> {
+export interface OrderItemOffering extends Pick<Offering, "id" | "name" | "type" | "includes" | "maximumQuantity" | "minimumQuantity"> {
 	costs?: OfferingCosts;
 	/**
 	 * doc assicated with this offering in the DB.
@@ -1170,7 +1178,7 @@ interface OrderContext$1 {
 	 */
 	[custom: string]: unknown;
 }
-export type CartSessionItem = Pick<OrderItem, "id" | "offeringId" | "quantity" | "options" | "offering"> & {
+export type CartSessionItem = Pick<OrderItem, "id" | "details" | "offeringId" | "quantity" | "options" | "offering"> & {
 	costs?: OrderItemCosts;
 };
 /**
