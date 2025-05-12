@@ -919,7 +919,7 @@ export interface OrderItem {
 	options: any | null;
 	offering: OrderItemOffering;
 }
-export interface OrderItemOffering extends Pick<Offering, "id" | "name" | "type" | "includes" | "maximumQuantity" | "minimumQuantity"> {
+export interface OrderItemOffering extends Pick<Offering, "id" | "name" | "type" | "includes" | "sorting" | "maximumQuantity" | "minimumQuantity"> {
 	costs?: OfferingCosts;
 	/**
 	 * doc assicated with this offering in the DB.
@@ -1178,7 +1178,7 @@ interface OrderContext$1 {
 	 */
 	[custom: string]: unknown;
 }
-export type CartSessionItem = Pick<OrderItem, "id" | "details" | "offeringId" | "quantity" | "options" | "offering"> & {
+export type CartSessionItem = Pick<OrderItem, "id" | "details" | "offeringId" | "quantity" | "options" | "offering" | "tableCommitmentId"> & {
 	costs?: OrderItemCosts;
 };
 /**
