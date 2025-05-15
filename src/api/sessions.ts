@@ -108,6 +108,24 @@ export class SessionsAPI extends CohostEndpoint {
         });
     }
 
+
+
+    /**
+     * Prepare the cart session for payment.
+     *
+     * @param sessionId - The ID of the cart session
+     * @param data - Data required for payment preparation
+     * @returns {CartSession} The prepared cart session
+     * 
+     * @throws Will throw an error if preparation fails
+     */
+    async processPayment(sessionId: string, data: unknown) {
+        return this.request<CartSession>(`/cart/sessions/${sessionId}/payment/process`, {
+            method: 'POST',
+            data: data,
+        });
+    }
+
     /**
      * Close the cart session, and place the order.
      * 
