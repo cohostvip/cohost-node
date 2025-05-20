@@ -1,5 +1,11 @@
 # @cohostvip/cohost-node
 
+## 0.1.4
+
+### Patch Changes
+
+- Updates to types
+
 ## 0.1.3
 
 ### Patch Changes

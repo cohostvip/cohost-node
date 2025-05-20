@@ -91,6 +91,40 @@ export type PaginatedResponse<T> = {
 	pagination: PaginationResponse;
 };
 /**
+ * A pre-parsed human-friendly representation of a date and time.
+ */
+export interface StructuredDate {
+	/** Formatted date strings. */
+	date: {
+		/** Full format, e.g., "Tuesday, October 3". */
+		EEEEMMMMd: string;
+		/** Short weekday/month/day, e.g., "Tue, Oct. 3". */
+		EEEMMMd: string;
+		/** Long date format, e.g., "Tuesday, October 3, 2023". */
+		long: string;
+		/** Short numeric format, e.g., "10/03/2023". */
+		short: string;
+	};
+	/** Time string (e.g., "3:00 PM"). */
+	time: string;
+	/** UTC timestamp (e.g., "2006-10-25T12:00:00Z"). */
+	utc: string;
+	/** IANA timezone (e.g., "America/New_York"). */
+	timezone: string;
+	/** Local timestamp (e.g., "2006-10-25T12:00:00-04:00"). */
+	local: string;
+	/** Whether this date is in the future. */
+	upcoming: boolean;
+	/** Duration details from now to the date. */
+	duration: {
+		days: number;
+		hours: number;
+		minutes: number;
+		weeks: number;
+		months: number;
+	};
+}
+/**
  * Base metadata for any record stored in the system.
  * Includes an ID and timestamps for creation and optional updates.
  *
@@ -315,6 +349,12 @@ export interface OfferingCosts extends CostBase {
 	 * In an order item, this is the total cost * Quantity.
 	 */
 	total: CurrencyAmount;
+}
+export interface StructuredCost {
+	currency: string;
+	formatted: string;
+	value: number;
+	majorValue: number;
 }
 export type CostBucket = "item" | "fee" | "tax" | "delivery";
 export interface CostComponent {
@@ -919,7 +959,7 @@ export interface OrderItem {
 	options: any | null;
 	offering: OrderItemOffering;
 }
-export interface OrderItemOffering extends Pick<Offering, "id" | "name" | "type" | "includes" | "sorting" | "maximumQuantity" | "minimumQuantity"> {
+export interface OrderItemOffering extends Pick<Offering, "id" | "name" | "type" | "includes" | "status" | "description" | "options" | "sorting"> {
 	costs?: OfferingCosts;
 	/**
 	 * doc assicated with this offering in the DB.
@@ -982,6 +1022,7 @@ export interface ResolvedCartContext {
 	 * }
 	 */
 	offerings?: Record<string, ResolvedCartContextOffering>;
+	config: any;
 }
 export interface ResolvedCartContextOffering {
 	path: string;
@@ -1178,8 +1219,9 @@ interface OrderContext$1 {
 	 */
 	[custom: string]: unknown;
 }
-export type CartSessionItem = Pick<OrderItem, "id" | "details" | "offeringId" | "quantity" | "options" | "offering" | "tableCommitmentId"> & {
+export type CartSessionItem = Pick<OrderItem, "id" | "details" | "offeringId" | "quantity" | "options" | "tableCommitmentId"> & {
 	costs?: OrderItemCosts;
+	offering: OrderItemOffering & Pick<Offering, "maximumQuantity" | "minimumQuantity">;
 };
 /**
  * Represents a temporary or persisted cart before order placement.
