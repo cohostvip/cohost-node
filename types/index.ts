@@ -959,7 +959,7 @@ export interface OrderItem {
 	options: any | null;
 	offering: OrderItemOffering;
 }
-export interface OrderItemOffering extends Pick<Offering, "id" | "name" | "type" | "includes" | "status" | "description" | "options" | "sorting"> {
+export interface OrderItemOffering extends Pick<Offering, "id" | "name" | "type" | "includes" | "status" | "description" | "options" | "maximumQuantity" | "minimumQuantity" | "sorting"> {
 	costs?: OfferingCosts;
 	/**
 	 * doc assicated with this offering in the DB.
@@ -1221,7 +1221,7 @@ interface OrderContext$1 {
 }
 export type CartSessionItem = Pick<OrderItem, "id" | "details" | "offeringId" | "quantity" | "options" | "tableCommitmentId"> & {
 	costs?: OrderItemCosts;
-	offering: OrderItemOffering & Pick<Offering, "maximumQuantity" | "minimumQuantity">;
+	offering: OrderItemOffering;
 };
 /**
  * Represents a temporary or persisted cart before order placement.
@@ -1280,8 +1280,12 @@ export interface CartSession extends DataRecord, Pick<Order, "currency" | "conte
 	 * Partner-forwarded data (e.g. utm, session metadata).
 	 */
 	forwarded?: any;
+	/**
+	 * Customer answers
+	 */
+	customerAnswers?: any;
 	status: "started" | "completed" | "abandoned" | "cancelled";
 }
-export type UpdatableCartSession = Pick<CartSession, "customer" | "items">;
+export type UpdatableCartSession = Pick<CartSession, "customer" | "items" | "customerAnswers" | "forwarded">;
 
 export {};
