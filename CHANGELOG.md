@@ -1,5 +1,11 @@
 # @cohostvip/cohost-node
 
+## 0.1.8
+
+### Patch Changes
+
+- Added **PaymentElementProvider** to handle tokenizing cards
+
 ## 0.1.7
 
 ### Patch Changes
