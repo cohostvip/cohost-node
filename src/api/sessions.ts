@@ -157,22 +157,9 @@ export class SessionsAPI extends CohostEndpoint {
         });
     }
 
-    /**
-     * Find available table options for a given cart session.
-     *
-     * @param id - The ID of the cart session
-     * @param props - Filter parameters for finding tables
-     * @returns {ViableTableOption[]} List of valid table options
-     * 
-     * @throws Will throw an error if the request fails
-     */
-    async findTables(id: string, props: FindTablesProps): Promise<ViableTableOption[]> {
-        return this.request<ViableTableOption[]>(`/cart/tables/find-tables/${id}`, {
-            query: {
-                ...props,
-            }
-        });
-    }
+
+
+
 
     /**
      * Join a table commitment within an active cart session.
@@ -188,6 +175,25 @@ export class SessionsAPI extends CohostEndpoint {
             method: 'POST',
             data: {
                 tableCommitmentId,
+            }
+        });
+    }
+
+
+    /**
+     * Apply a coupon code to the cart session.
+     *
+     * @param id - The ID of the cart session
+     * @param code - The coupon code to apply
+     * @returns {CartSession} Updated cart session with applied coupon
+     * 
+     * @throws Will throw an error if the coupon application fails
+     */
+    async applyCoupon(id: string, code: string): Promise<CartSession> {
+        return this.request<CartSession>(`/cart/sessions/${id}/coupons`, {
+            method: 'POST',
+            data: {
+                code
             }
         });
     }

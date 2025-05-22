@@ -1,5 +1,11 @@
 # @cohostvip/cohost-node
 
+## 0.1.6
+
+### Patch Changes
+
+- Can add coupon to cart
+
 ## 0.1.5
 
 ### Patch Changes
