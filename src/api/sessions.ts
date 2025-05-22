@@ -197,4 +197,19 @@ export class SessionsAPI extends CohostEndpoint {
             }
         });
     }
+
+    /**
+     * Find viable table options for a cart session.
+     *
+     * @param id - The ID of the cart session
+     * @param props - Properties to find viable tables
+     * @returns {ViableTableOption[]} List of viable table options
+     * 
+     * @throws Will throw an error if the request fails
+     */
+    async deleteCoupon(id: string, couponId: string): Promise<CartSession> {
+        return this.request<CartSession>(`/cart/sessions/${id}/coupons/${couponId}`, {
+            method: 'DELETE'
+        });
+    }
 }
