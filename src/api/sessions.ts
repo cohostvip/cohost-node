@@ -1,6 +1,5 @@
-import { CartSession, UpdatableCartSession } from '../../types';
+import { CartSession, StartCartSessionInput, UpdatableCartSession } from '../../types';
 import { CohostEndpoint } from '../endpoint';
-import { FindTablesProps, StartCartSessionInput, ViableTableOption } from '../types/sessions';
 
 /**
  * Provides methods to interact with cart sessions in the Cohost API.

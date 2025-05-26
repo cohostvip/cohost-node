@@ -1,5 +1,11 @@
 # @cohostvip/cohost-node
 
+## 0.1.10
+
+### Patch Changes
+
+- added support for trakcing code and context when starting a new cart session"
+
 ## 0.1.8
 
 ### Patch Changes

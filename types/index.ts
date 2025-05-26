@@ -523,6 +523,11 @@ export interface Attendee3 extends DataRecord {
 	 * For event it will be the ticket's id
 	 */
 	offeringId: string;
+	/**
+	 *
+	 */
+	orderNumber: string;
+	uid: string | null;
 	offeringSnapshot: Partial<Offering>;
 	profile: Customer | null;
 	checkedIn: boolean;
@@ -959,7 +964,7 @@ export interface OrderItem {
 	options: any | null;
 	offering: OrderItemOffering;
 }
-export interface OrderItemOffering extends Pick<Offering, "id" | "name" | "type" | "includes" | "status" | "description" | "options" | "maximumQuantity" | "minimumQuantity" | "sorting"> {
+export interface OrderItemOffering extends Pick<Offering, "id" | "name" | "type" | "description" | "sorting"> {
 	costs?: OfferingCosts;
 	/**
 	 * doc assicated with this offering in the DB.
@@ -1162,6 +1167,10 @@ export interface Order extends VCDataRecord {
 	 * Includes IPs, referrer, user agent, cart session ID, and tracking info.
 	 */
 	context: OrderContext;
+	/**
+	 * userId
+	 */
+	uid: string | null;
 	version: ApiVersion;
 }
 export type OrderContext = {
@@ -1208,20 +1217,17 @@ interface OrderContext$1 {
 	 * @example "examplepartner.com"
 	 */
 	originDomain?: string;
-	/**
-	 * (Optional) Campaign ID, UTM source, or tracking label.
-	 * Useful for affiliate and analytics systems.
-	 * @example "utm_campaign=spring_launch"
-	 */
-	trackingId?: string;
-	/**
-	 * Allows custom fields for analytics, partners, or experiment data.
-	 */
-	[custom: string]: unknown;
+	tracking?: Record<string, string>;
+	forward?: Record<string, any>;
 }
+export type StartCartSessionInput = {
+	contextId: string;
+	sessionContext: Partial<OrderContext$1>;
+};
+export type CartSessionItemOffering = OrderItemOffering & Pick<Offering, "options" | "maximumQuantity" | "minimumQuantity" | "status" | "includes">;
 export type CartSessionItem = Pick<OrderItem, "id" | "details" | "offeringId" | "quantity" | "options" | "tableCommitmentId"> & {
 	costs?: OrderItemCosts;
-	offering: OrderItemOffering;
+	offering: CartSessionItemOffering;
 };
 /**
  * Represents a temporary or persisted cart before order placement.
