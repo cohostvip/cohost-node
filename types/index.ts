@@ -514,7 +514,7 @@ export type Customer = Person & PersonContact & {
 	uid: string | null;
 };
 export type AttendeeStatus = "attending" | "checkedIn" | "cancelled" | "refunded" | "noShow" | "unknown" | string;
-export interface Attendee3 extends DataRecord {
+export interface Attendee extends DataRecord {
 	/**
 	 * Order ID, from /orders/:orderId
 	 */
@@ -1173,7 +1173,7 @@ export interface Order extends VCDataRecord {
 	uid: string | null;
 	version: ApiVersion;
 }
-export type OrderContext = {
+export type OrderContext = ({
 	type: "event";
 	event: EventProfile;
 	venue?: Venue;
@@ -1181,6 +1181,8 @@ export type OrderContext = {
 	type: "venue";
 	event?: EventProfile;
 	venue: Venue;
+}) & {
+	[key: string]: any;
 };
 interface OrderContext$1 {
 	/**

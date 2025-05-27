@@ -1,5 +1,11 @@
 # @cohostvip/cohost-node
 
+## 0.1.11
+
+### Patch Changes
+
+- Can get attendees list for order. method: `orders.attendees`
+
 ## 0.1.10
 
 ### Patch Changes

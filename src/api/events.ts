@@ -1,7 +1,7 @@
 // src/api/EventsAPI.ts
 
 import { CohostEndpoint } from '../endpoint';
-import { Attendee3, EventProfile, PaginatedRequest, PaginatedResponse, Ticket } from '../../types/index';
+import { Attendee, EventProfile, PaginatedRequest, PaginatedResponse, Ticket } from '../../types/index';
 import { paginatedOptions } from '../http/request';
 
 /**
@@ -63,7 +63,7 @@ export class EventsAPI extends CohostEndpoint {
    * @returns List of tickets (attendees) for the event.
    */
   async attendees(id: string, filters?: PaginatedRequest<any>) {
-    return this.request<PaginatedResponse<Attendee3>>(`/events/${id}/attendees`, paginatedOptions(filters));
+    return this.request<PaginatedResponse<Attendee>>(`/events/${id}/attendees`, paginatedOptions(filters));
   }
 
  

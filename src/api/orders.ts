@@ -26,6 +26,19 @@ export class OrdersAPI extends CohostEndpoint {
   }
 
   /**
+   * Fetch a single order by ID.
+   * 
+   * @param id - The unique identifier of the order
+   * @param uid - The unique user ID associated with the order (currently unused but reserved for future auth context)
+   * @returns A Promise resolving to the order object
+   * @throws Will throw an error if the request fails or the order is not found
+   */
+  async attendees(id: string, uid: string) {
+    // uid is reserved for future scoped access/auth features
+    return this.request(`/orders/${id}/attendees?uid=${uid}`);
+  }
+
+  /**
    * List orders with optional filters.
    * 
    * @param filters - Optional filters to apply when retrieving orders
