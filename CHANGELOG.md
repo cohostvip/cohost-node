@@ -1,5 +1,11 @@
 # @cohostvip/cohost-node
 
+## 0.1.12
+
+### Patch Changes
+
+- better error messages
+
 ## 0.1.11
 
 ### Patch Changes

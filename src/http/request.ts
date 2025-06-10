@@ -104,7 +104,17 @@ const request = ({ token, baseUrl = apiBaseUrl, debug = false }: RequestProps): 
     if (debug) {
       console.log(`[Cohost SDK] Request: ${method} ${url}`);
       if (body) console.log(`[Cohost SDK] Body:`, body);
-      console.log(`[Cohost SDK] Headers:`, reqHeaders);
+
+      const cleanHeaders: Record<string, string> = {};
+      for (const [key, value] of Object.entries(reqHeaders)) {
+        if (key.toLowerCase() === "authorization") {
+          cleanHeaders[key] = "Bearer <token>" + (value ? ` (${value.split(" ")[1].slice(0, 4)}...)` : "");
+        } else {
+          cleanHeaders[key] = value;
+        }
+      }
+
+      console.log(`[Cohost SDK] Headers:`, cleanHeaders);
     }
 
     const res = await fetch(url, {
@@ -118,7 +128,7 @@ const request = ({ token, baseUrl = apiBaseUrl, debug = false }: RequestProps): 
 
     if (!res.ok) {
       const message = typeof responseBody === "string" ? responseBody : JSON.stringify(responseBody);
-      console.error(`[Cohost SDK] Error: ${message}`, { url });
+      console.error(`[Cohost SDK] Error(${res.status}): ${message}`, { url });
       throw new CohostError(message || res.statusText, {
         errorCode: res.statusText || "API_ERROR",
         statusCode: res.status,
