@@ -1,6 +1,6 @@
 {
   "name": "@cohostvip/cohost-node",
-  "version": "0.1.12",
+  "version": "0.1.13",
   "description": "Cohost API wrapper",
   "main": "dist/index.mjs",
   "module": "dist/index.mjs",
