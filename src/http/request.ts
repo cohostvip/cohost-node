@@ -108,7 +108,8 @@ const request = ({ token, baseUrl = apiBaseUrl, debug = false }: RequestProps): 
       const cleanHeaders: Record<string, string> = {};
       for (const [key, value] of Object.entries(reqHeaders)) {
         if (key.toLowerCase() === "authorization") {
-          cleanHeaders[key] = "Bearer <token>" + (value ? ` (${value.split(" ")[1].slice(0, 4)}...)` : "");
+            const tokenValue = value?.split(" ")[1];
+            cleanHeaders[key] = "Bearer <token-" + (tokenValue ? `${tokenValue[0]}...${tokenValue.slice(-4)}>` : "");
         } else {
           cleanHeaders[key] = value;
         }

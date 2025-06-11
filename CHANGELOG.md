@@ -1,5 +1,11 @@
 # @cohostvip/cohost-node
 
+## 0.1.14
+
+### Patch Changes
+
+- Switched the authnet tokenizer to production"
+
 ## 0.1.12
 
 ### Patch Changes
