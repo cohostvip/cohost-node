@@ -494,24 +494,401 @@ export interface Ticket extends Omit<Offering, "hidden" | "constraints" | "type"
 	refId?: string;
 }
 /**
- * Person interface
- */
+* Represents a physical address with comprehensive localization support.
+*
+* @interface Address
+* @example
+* ```typescript
+* // Basic US address
+* const usAddress: Address = {
+*   address_1: "123 Main Street",
+*   address_2: "Apt 4B",
+*   city: "New York",
+*   country: "US",
+*   postal_code: "10001",
+*   region: "NY"
+* };
+*
+* // US address with premise
+* const businessAddress: Address = {
+*   address_1: "1600 Pennsylvania Avenue NW",
+*   city: "Washington",
+*   country: "US",
+*   premise: "West Wing",
+*   postal_code: "20500",
+*   region: "DC"
+* };
+*
+* // US address with formatting
+* const formattedAddress: Address = {
+*   address_1: "350 Fifth Avenue",
+*   city: "New York",
+*   country: "US",
+*   postal_code: "10118",
+*   region: "NY",
+*   formattedAddress: "350 Fifth Avenue, New York, NY 10118, US",
+*   localized_multi_line_address_display: [
+*     "350 Fifth Avenue",
+*     "New York, NY 10118"
+*   ]
+* };
+* ```
+*/
+export interface Address {
+	/**
+	 * Primary street address line.
+	 *
+	 * @example "123 Main Street"
+	 * @example "1600 Pennsylvania Avenue NW"
+	 */
+	address_1: string;
+	/**
+	 * Secondary address line for apartment, suite, or unit numbers.
+	 *
+	 * @example "Apt 4B"
+	 * @example "Suite 100"
+	 * @example "Unit 12"
+	 */
+	address_2?: string;
+	/**
+	 * City or locality name.
+	 *
+	 * @example "New York"
+	 * @example "San Francisco"
+	 * @example "Chicago"
+	 */
+	city: string;
+	/**
+	 * ISO 3166-1 alpha-2 country code.
+	 *
+	 * @example "US" // United States
+	 */
+	country: string;
+	/**
+	 * Building or premise identifier (building name, floor, etc.).
+	 *
+	 * @example "Building A"
+	 * @example "3rd Floor"
+	 * @example "West Wing"
+	 */
+	premise?: string;
+	/**
+	 * Complete formatted address as a single string.
+	 * Useful for display purposes or geocoding services.
+	 *
+	 * @example "123 Main Street, Apt 4B, New York, NY 10001, US"
+	 * @example "1600 Pennsylvania Avenue NW, Washington, DC 20500, US"
+	 */
+	formattedAddress?: string;
+	/**
+	 * Localized version of the complete address.
+	 * For US addresses, typically the same as the standard format.
+	 *
+	 * @example "123 Main Street, New York, NY 10001"
+	 */
+	localized_address_display?: string;
+	/**
+	 * Localized area/region display combining city and state.
+	 *
+	 * @example "Brooklyn, NY"
+	 * @example "Los Angeles, CA"
+	 * @example "Miami, FL"
+	 */
+	localized_area_display?: string;
+	/**
+	 * Multi-line address display as an array of strings.
+	 * Each element represents a line for proper address formatting on labels or forms.
+	 *
+	 * @example
+	 * [
+	 *   "123 Main Street",
+	 *   "Apt 4B",
+	 *   "New York, NY 10001"
+	 * ]
+	 *
+	 * @example
+	 * [
+	 *   "350 Fifth Avenue",
+	 *   "New York, NY 10118"
+	 * ]
+	 */
+	localized_multi_line_address_display?: string[];
+	/**
+	 * US ZIP code or ZIP+4 format.
+	 *
+	 * @example "10001" // Standard ZIP
+	 * @example "10001-1234" // ZIP+4 format
+	 * @example "90210" // Beverly Hills ZIP
+	 */
+	postal_code: string;
+	/**
+	 * US state or territory 2-letter abbreviation.
+	 *
+	 * @example "NY" // New York
+	 * @example "CA" // California
+	 * @example "TX" // Texas
+	 * @example "DC" // District of Columbia
+	 */
+	region: string;
+}
+/**
+* Represents a person with basic identity information.
+*
+* @interface Person
+* @example
+* ```typescript
+* const person: Person = {
+*   name: "John Michael Smith",
+*   displayName: "John Smith",
+*   first: "John",
+*   last: "Smith",
+*   gender: "male",
+*   birthdate: "1990-05-15",
+*   age: 33,
+*   photoURL: "https://example.com/photos/john-smith.jpg"
+* };
+* ```
+*/
 export interface Person {
+	/**
+	 * Full name of the person.
+	 *
+	 * @example "John Michael Smith"
+	 * @example "Sarah Johnson"
+	 */
 	name: string;
+	/**
+	 * URL to the person's profile photo or avatar.
+	 * Can be null if no photo is available.
+	 *
+	 * @example "https://example.com/photos/john-smith.jpg"
+	 * @example "https://cdn.example.com/avatars/user123.png"
+	 * @example null
+	 */
 	photoURL?: string | null;
+	/**
+	 * Preferred display name for the person.
+	 * Often a shortened or preferred version of their full name.
+	 *
+	 * @example "John Smith"
+	 * @example "Mike"
+	 * @example "Dr. Johnson"
+	 */
 	displayName: string;
+	/**
+	 * First name or given name.
+	 *
+	 * @example "John"
+	 * @example "Sarah"
+	 * @example "Michael"
+	 */
 	first: string;
+	/**
+	 * Last name or family name.
+	 *
+	 * @example "Smith"
+	 * @example "Johnson"
+	 * @example "Williams"
+	 */
 	last: string;
+	/**
+	 * Gender identity of the person.
+	 * Can be null if not specified or prefer not to answer.
+	 *
+	 * @example "male"
+	 * @example "female"
+	 * @example "other"
+	 * @example null
+	 */
 	gender: null | string | "male" | "female" | "other";
+	/**
+	 * Date of birth in ISO 8601 format (YYYY-MM-DD).
+	 * Can be null if not provided.
+	 *
+	 * @example "1990-05-15"
+	 * @example "1985-12-25"
+	 * @example null
+	 */
 	birthdate?: string | null;
+	/**
+	 * Current age in years.
+	 * Typically calculated from birthdate.
+	 *
+	 * @example 33
+	 * @example 28
+	 * @example 45
+	 */
 	age?: number;
 }
+/**
+* Contact information for a person.
+*
+* @interface PersonContact
+* @example
+* ```typescript
+* const contact: PersonContact = {
+*   email: "john.smith@example.com",
+*   phone: "+1-555-123-4567"
+* };
+*
+* // Minimal contact with only email
+* const emailOnly: PersonContact = {
+*   email: "sarah@example.com",
+*   phone: null
+* };
+* ```
+*/
 export interface PersonContact {
+	/**
+	 * Primary email address.
+	 * Can be null if no email is provided.
+	 *
+	 * @example "john.smith@example.com"
+	 * @example "user123@gmail.com"
+	 * @example null
+	 */
 	email: string | null;
+	/**
+	 * Primary phone number.
+	 * Can be null if no phone number is provided.
+	 * Format may vary (with/without country code, formatting).
+	 *
+	 * @example "+1-555-123-4567"
+	 * @example "(555) 123-4567"
+	 * @example "5551234567"
+	 * @example null
+	 */
 	phone: string | null;
 }
+/**
+* Address information with associated person's name.
+* Extends the base Address interface with first and last name fields.
+* Useful for shipping/billing addresses where the recipient name may differ from the customer.
+*
+* @interface PersonAddress
+* @extends Address
+* @example
+* ```typescript
+* const shippingAddress: PersonAddress = {
+*   first: "John",
+*   last: "Smith",
+*   address_1: "123 Main Street",
+*   address_2: "Apt 4B",
+*   city: "New York",
+*   country: "US",
+*   postal_code: "10001",
+*   region: "NY"
+* };
+*
+* // Gift shipping to different recipient
+* const giftAddress: PersonAddress = {
+*   first: "Jane",
+*   last: "Doe",
+*   address_1: "456 Oak Avenue",
+*   city: "Los Angeles",
+*   country: "US",
+*   postal_code: "90210",
+*   region: "CA"
+* };
+* ```
+*/
+export interface PersonAddress extends Address {
+	/**
+	 * First name of the person at this address.
+	 * May differ from the customer's name for gift deliveries.
+	 *
+	 * @example "John"
+	 * @example "Jane"
+	 */
+	first: string;
+	/**
+	 * Last name of the person at this address.
+	 * May differ from the customer's name for gift deliveries.
+	 *
+	 * @example "Smith"
+	 * @example "Doe"
+	 */
+	last: string;
+}
+/**
+* Complete customer information combining personal details, contact info, and addresses.
+* Represents a customer in an e-commerce or service system.
+*
+* @type Customer
+* @example
+* ```typescript
+* const customer: Customer = {
+*   uid: "user_abc123",
+*   name: "John Michael Smith",
+*   displayName: "John Smith",
+*   first: "John",
+*   last: "Smith",
+*   gender: "male",
+*   birthdate: "1990-05-15",
+*   age: 33,
+*   email: "john.smith@example.com",
+*   phone: "+1-555-123-4567",
+*   billingAddress: {
+*     first: "John",
+*     last: "Smith",
+*     address_1: "123 Main Street",
+*     city: "New York",
+*     country: "US",
+*     postal_code: "10001",
+*     region: "NY"
+*   },
+*   shippingAddress: {
+*     first: "John",
+*     last: "Smith",
+*     address_1: "456 Work Plaza",
+*     address_2: "Suite 100",
+*     city: "New York",
+*     country: "US",
+*     postal_code: "10005",
+*     region: "NY"
+*   }
+* };
+*
+* // Guest customer (no account)
+* const guestCustomer: Customer = {
+*   uid: null,
+*   name: "Jane Doe",
+*   displayName: "Jane Doe",
+*   first: "Jane",
+*   last: "Doe",
+*   gender: null,
+*   email: "jane@example.com",
+*   phone: null
+* };
+* ```
+*/
 export type Customer = Person & PersonContact & {
+	/**
+	 * Unique identifier for the customer account.
+	 * Can be null for guest customers who haven't created an account.
+	 *
+	 * @example "user_abc123"
+	 * @example "cust_def456"
+	 * @example null // Guest customer
+	 */
 	uid: string | null;
+	/**
+	 * Billing address for payment and invoicing.
+	 * Can be null if not yet provided.
+	 *
+	 * @example PersonAddress object with billing details
+	 * @example null
+	 */
+	billingAddress?: PersonAddress | null;
+	/**
+	 * Shipping address for order delivery.
+	 * Can be null for digital products or if not yet provided.
+	 * May differ from billing address.
+	 *
+	 * @example PersonAddress object with shipping details
+	 * @example null
+	 */
+	shippingAddress?: PersonAddress | null;
 };
 export type AttendeeStatus = "attending" | "checkedIn" | "cancelled" | "refunded" | "noShow" | "unknown" | string;
 export interface Attendee extends DataRecord {
@@ -558,19 +935,6 @@ export interface EventFeature {
 	key: string;
 	meta?: any;
 	data: any;
-}
-export interface Address {
-	address_1: string;
-	address_2?: string;
-	city: string;
-	country: string;
-	premise?: string;
-	formattedAddress?: string;
-	localized_address_display?: string;
-	localized_area_display?: string;
-	localized_multi_line_address_display?: string[];
-	postal_code: string;
-	region: string;
 }
 /**
  * A simple point geometry consisting of latitude and longitude.
@@ -1237,7 +1601,7 @@ export type CartSessionItem = Pick<OrderItem, "id" | "details" | "offeringId" | 
  *
  * @export
  */
-export interface CartSession extends DataRecord, Pick<Order, "currency" | "contextId" | "version" | "coupons" | "companyId" | "organizerId" | "meta"> {
+export interface CartSession extends DataRecord, Pick<Order, "currency" | "contextId" | "version" | "coupons" | "companyId" | "organizerId"> {
 	orderId?: string;
 	/**
 	 * Authenticated user ID, if available.
@@ -1292,8 +1656,36 @@ export interface CartSession extends DataRecord, Pick<Order, "currency" | "conte
 	 * Customer answers
 	 */
 	customerAnswers?: any;
-	status: "started" | "completed" | "abandoned" | "cancelled";
+	status: "started" | "completed" | "stale" | "abandoned" | "cancelled";
+	meta: CartSessionMeta;
 }
+export type StaleMeta = {
+	/**
+	 * Hard stale time in milliseconds.
+	 * After this time, the cart is considered abandoned.
+	 */
+	hard: number;
+	/**
+	 * Soft stale time in milliseconds.
+	 * After this time, the cart is considered abandoned.
+	 * This is the last change+idle, no later than hard time.
+	 */
+	soft: number;
+	/**
+	 * Idle time in milliseconds.s
+	 */
+	idle: number;
+};
+export type CartSessionMeta = Partial<Pick<Order, "meta">> & {
+	paymentIntent?: any;
+	/** policy for cart to become abandon  */
+	stale: StaleMeta;
+	/**
+	   * Any additional internal system flags, A/B test conditions, or
+	   * non-critical partner payloads.
+	   */
+	[key: string]: any;
+};
 export type UpdatableCartSession = Pick<CartSession, "customer" | "items" | "customerAnswers" | "forwarded">;
 
 export {};

@@ -1,5 +1,11 @@
 # @cohostvip/cohost-node
 
+## 0.1.15
+
+### Patch Changes
+
+- Support for billing address
+
 ## 0.1.14
 
 ### Patch Changes
