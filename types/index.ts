@@ -372,6 +372,7 @@ export interface CostComponent {
 	ops: CostOp[];
 	cap?: CostComponentCap;
 	rules: CostComponentRule[];
+	enabled?: boolean;
 	version: "2025-03-25";
 }
 export interface CalculatedCostComponent extends Omit<CostComponent, "ops" | "cap" | "rules" | "details" | "currency"> {
@@ -458,6 +459,16 @@ export interface Offering extends DataRecord {
 	 * @ignore
 	 */
 	costComponents?: CostComponent[];
+	meta?: {
+		[key: string]: any;
+	};
+	config?: {
+		groups?: OfferingPurchaseGroupSetting;
+	};
+}
+export interface OfferingPurchaseGroupSetting {
+	enabled: boolean;
+	autoGenerateGroupId?: boolean;
 }
 export interface OfferingOptionsGroup {
 	id: string;
@@ -476,6 +487,7 @@ export interface PackageInclude {
 	quantity: number;
 	type: OfferingType;
 	description: string;
+	name?: string;
 	/**
 	 * path to the offering doc in the db.
 	 */
@@ -1282,7 +1294,7 @@ export interface OrderItem {
 	 * @example "item_abc123"
 	 */
 	id: string;
-	tableCommitmentId: string | null;
+	purchaseGroupId: string | null;
 	tableCommitment?: {
 		id: string;
 		groupSize: number;
@@ -1323,7 +1335,10 @@ export interface OrderItem {
 	 * This can include custom fields or additional information.
 	 * @example { "customField": "value" }
 	 */
-	meta: any;
+	meta?: null | {
+		groups?: OfferingPurchaseGroupSetting;
+		[key: string]: any;
+	};
 	details: string | null;
 	options: any | null;
 	offering: OrderItemOffering;
@@ -1591,7 +1606,7 @@ export type StartCartSessionInput = {
 	sessionContext: Partial<OrderContext$1>;
 };
 export type CartSessionItemOffering = OrderItemOffering & Pick<Offering, "options" | "maximumQuantity" | "minimumQuantity" | "status" | "includes">;
-export type CartSessionItem = Pick<OrderItem, "id" | "details" | "offeringId" | "quantity" | "options" | "tableCommitmentId"> & {
+export type CartSessionItem = Pick<OrderItem, "id" | "details" | "offeringId" | "quantity" | "options" | "purchaseGroupId"> & {
 	costs?: OrderItemCosts;
 	offering: CartSessionItemOffering;
 };
@@ -1603,6 +1618,7 @@ export type CartSessionItem = Pick<OrderItem, "id" | "details" | "offeringId" | 
  */
 export interface CartSession extends DataRecord, Pick<Order, "currency" | "contextId" | "version" | "coupons" | "companyId" | "organizerId"> {
 	orderId?: string;
+	orderNumber?: string;
 	/**
 	 * Authenticated user ID, if available.
 	 * @example "uid_123abc"
